@@ -1,0 +1,113 @@
+{
+  "loja_integrada": {
+    "chave_api": "a11542bc1dda66018ff6",
+    "chave_aplicacao": "3ea077f3-97f3-417f-80cd-326ceaad6519"
+  },
+
+  "telegram": {
+    "enabled": true,
+    "bot_token": "8394491554:AAE65U2uhjmssegA5DbbfvTcPAP8UdZYLkc",
+    "chat_ids": ["665712154"]
+  },
+
+  "alert_thresholds": {
+    "expensive_pct": 10,
+    "cheapest_pct": -10,
+    "local_competitor_priority": true
+  },
+
+  "scraping": {
+    "interval_hours": 6,
+    "delay_between_requests_sec": 2.5
+  },
+
+  "competitors": [
+    {
+      "name": "ShopMusic",
+      "base_url": "https://www.shopmusiconline.com.br",
+      "local": true,
+      "city": "Ipatinga-MG",
+      "products": [
+        {"sku":"GIANNINI-N14","name":"Violao Giannini Start N14 Nailon","url":"https://www.shopmusiconline.com.br/violao-giannini-start-gn14-nailon-natural"},
+        {"sku":"TAKAMINE-GD11","name":"Violao Takamine GD11 Folk Mahogany","url":"https://www.shopmusiconline.com.br/violao-takamine-gd11mce-ns-aco-mogno-fosco"},
+        {"sku":"SEIZI-AKIRA","name":"Violao Seizi Akira Kaizen","url":"https://www.shopmusiconline.com.br/buscar?q=seizi+akira+kaizen"},
+        {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.shopmusiconline.com.br/guitarra-tagima-woodstock-tg-510-candy-apple-vermelho-metalico"},
+        {"sku":"TAGIMA-TG500","name":"Guitarra Tagima TG-500","url":"https://www.shopmusiconline.com.br/guitarra-tagima-woodstock-tg-500-bk-preta"},
+        {"sku":"TAGIMA-TG530","name":"Guitarra Tagima TG-530","url":"https://www.shopmusiconline.com.br/guitarra-tagima-woodstock-tg530-sg-verde"},
+        {"sku":"TAGIMA-T635","name":"Guitarra Tagima T-635","url":"https://www.shopmusiconline.com.br/guitarra-tagima-t-635-wv-ett-branca-vint-escudo-shell"},
+        {"sku":"STRINBERG-STS100","name":"Guitarra Strinberg STS-100","url":"https://www.shopmusiconline.com.br/guitarra-strinberg-sts-100-stratocaster-preto"},
+        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.shopmusiconline.com.br/teclado-yamaha-psr-e373-arranjador-58-c-fonte-110220v-inclusa"},
+        {"sku":"YAMAHA-PSR-F52","name":"Teclado Yamaha PSR F52","url":"https://www.shopmusiconline.com.br/teclado-yamaha-psr-f52-bra-58-c-fonte-bivolt"},
+        {"sku":"YAMAHA-PSR-EW410","name":"Teclado Yamaha PSR EW410","url":"https://www.shopmusiconline.com.br/teclado-yamaha-psr-ew410-com-fonte-inclusa"}
+      ]
+    },
+    {
+      "name": "Super Sonora",
+      "base_url": "https://www.supersonora.com.br",
+      "local": false,
+      "products": [
+        {"sku":"GIANNINI-N14","name":"Violao Giannini N14","url":"https://www.supersonora.com.br/violao-giannini-start-gn14-nailon-preto"},
+        {"sku":"TAKAMINE-GD11","name":"Violao Takamine GD11","url":"https://www.supersonora.com.br/violao-eletrico-aco-folk-gd11-mce-mahogany-cutaway-preamp-tp-4td-captador-piezo-takamine"},
+        {"sku":"SEIZI-AKIRA","name":"Violao Seizi Akira","url":"https://www.supersonora.com.br/violao-seizi-akira-kaizen"},
+        {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.supersonora.com.br/guitarra-eletrica-stratocaster-tagima-tg-510-black"},
+        {"sku":"TAGIMA-TG530","name":"Guitarra Tagima TG-530","url":"https://www.supersonora.com.br/guitarra-tagima-stratocaster-tg-530-woodstock-sunburst"},
+        {"sku":"TAGIMA-T805","name":"Guitarra Tagima T-805","url":"https://www.supersonora.com.br/guitarra-tagima-t-805-brasil-stratocaster-preta"},
+        {"sku":"TAGIMA-SIXMART","name":"Guitarra Tagima Sixmart","url":"https://www.supersonora.com.br/guitarra-tagima-stratocaster-sixmart-preta-delay-reverb-chorus-distortion"},
+        {"sku":"VIOLAO-TAGIMA-ANDES","name":"Violao Tagima Andes Folk","url":"https://www.supersonora.com.br/violao-tagima-andes-aco-eletrico-agathis-latin-america-folk-natural-ntabs"}
+      ]
+    },
+    {
+      "name": "Loja Constelacao",
+      "base_url": "https://www.lojaconstelacao.com.br",
+      "local": false,
+      "products": [
+        {"sku":"GIANNINI-N14","name":"Violao Giannini N14","url":"https://www.lojaconstelacao.com.br/violao-classico-giannini-acustico-start-n14-preto"},
+        {"sku":"SEIZI-AKIRA","name":"Violao Seizi Akira","url":"https://www.lojaconstelacao.com.br/violao-eletroacustico-seizi-akira-kaizen-space-grey-marcelo-carvalho"},
+        {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.lojaconstelacao.com.br/buscar?q=tagima+tg-510"},
+        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.lojaconstelacao.com.br/buscar?q=yamaha+psr+e373"},
+        {"sku":"YAMAHA-PSR-EW410","name":"Teclado Yamaha PSR EW410","url":"https://www.lojaconstelacao.com.br/buscar?q=yamaha+psr+ew410"}
+      ]
+    },
+    {
+      "name": "Guarani Musical",
+      "base_url": "https://www.guaranimusical.com.br",
+      "local": false,
+      "products": [
+        {"sku":"TAKAMINE-GD11","name":"Violao Takamine GD11","url":"https://www.guaranimusical.com.br/instrumentos-musicais/violao-folk-takamine-gd11mce-mahogany"},
+        {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.guaranimusical.com.br/busca?q=tagima+tg510"},
+        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.guaranimusical.com.br/busca?q=yamaha+psr+e373"}
+      ]
+    },
+    {
+      "name": "American Musical",
+      "base_url": "https://www.americanmusical.com.br",
+      "local": false,
+      "products": [
+        {"sku":"GIANNINI-N14","name":"Violao Giannini N14","url":"https://www.americanmusical.com.br/violao-nylon-giannini-acustico-serie-start-estudante-n-14-n"},
+        {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.americanmusical.com.br/guitarra-eletrica-tagima-tg-510-strato-hss"},
+        {"sku":"TAGIMA-TG530","name":"Guitarra Tagima TG-530","url":"https://www.americanmusical.com.br/guitarra-tagima-tg530"},
+        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.americanmusical.com.br/teclado-arranjador-yamaha-psr-e373"}
+      ]
+    },
+    {
+      "name": "BH Guitar",
+      "base_url": "https://www.bhguitar.com.br",
+      "local": false,
+      "products": [
+        {"sku":"SEIZI-AKIRA","name":"Violao Seizi Akira","url":"https://www.bhguitar.com.br/buscar?q=seizi+akira+kaizen"},
+        {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.bhguitar.com.br/buscar?q=tagima+tg-510"},
+        {"sku":"TAGIMA-T635","name":"Guitarra Tagima T-635","url":"https://www.bhguitar.com.br/buscar?q=tagima+t-635"}
+      ]
+    },
+    {
+      "name": "Mundomax",
+      "base_url": "https://www.mundomax.com.br",
+      "local": false,
+      "products": [
+        {"sku":"TAKAMINE-GD11","name":"Violao Takamine GD11","url":"https://www.mundomax.com.br/violao-gd11mce-mogno-takamine"},
+        {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.mundomax.com.br/busca?q=tagima+tg510"},
+        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.mundomax.com.br/busca?q=yamaha+psr+e373"}
+      ]
+    }
+  ]
+}

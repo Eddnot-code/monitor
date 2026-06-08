@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PriceWatch — Musical Presentes</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d12;--bg2:#10131a;--bg3:#161920;--bg4:#1c2028;
+  --border:#222630;--border2:#2a2f3d;
+  --text:#dde1ec;--muted:#5a6175;--muted2:#8891a8;
+  --green:#1ed760;--green-d:#0a3d1f;
+  --red:#ff4757;--red-d:#3d0a0f;
+  --amber:#ffc107;--amber-d:#3d2f00;
+  --blue:#4dabf7;--blue-d:#0d2a42;
+  --mono:"Space Mono",monospace;
+  --sans:"Syne",sans-serif;
+  --r:8px;--r2:14px;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;line-height:1.5}
+.app{display:flex;min-height:100vh}
+.sidebar{width:215px;min-width:215px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.logo-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+.logo-main{font-size:19px;font-weight:800;letter-spacing:-0.5px}
+.logo-main em{font-style:normal;color:var(--green)}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.nav{padding:10px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;color:var(--muted2);font-size:12px;font-weight:600;transition:all .13s;border-left:2px solid transparent;user-select:none}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--text);border-left-color:var(--green);background:var(--bg3)}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .13s}
+.nav-item.active .nav-dot,.nav-item:hover .nav-dot{background:var(--green)}
+.nb{margin-left:auto;font-size:9px;font-family:var(--mono);background:var(--red);color:white;padding:1px 5px;border-radius:20px;font-weight:700}
+.sb-footer{padding:12px 18px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);font-family:var(--mono)}
+.pulse{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);margin-right:5px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.main{flex:1;margin-left:215px;display:flex;flex-direction:column;min-height:100vh}
+.topbar{padding:12px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg2);position:sticky;top:0;z-index:50}
+.topbar-title{font-size:14px;font-weight:700}
+.topbar-r{display:flex;gap:8px;align-items:center}
+.btn{font-family:var(--sans);font-size:11px;font-weight:700;padding:6px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer;transition:all .13s;display:inline-flex;align-items:center;gap:5px}
+.btn:hover{border-color:var(--muted);background:var(--bg4)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#000;font-weight:800}
+.btn.primary:hover{opacity:.88}
+.content{padding:20px 24px;flex:1}
+.page{display:none}.page.active{display:block}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.mc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px}
+.mc-label{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px;font-weight:600}
+.mc-val{font-size:24px;font-weight:700;font-family:var(--mono);line-height:1}
+.mc-sub{font-size:10px;margin-top:4px;color:var(--muted2)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:14px}
+.card-h{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.badge{font-size:9px;font-weight:700;font-family:var(--mono);padding:2px 7px;border-radius:20px;display:inline-flex;align-items:center;gap:3px}
+.bg{background:var(--green-d);color:var(--green);border:1px solid #1ed76033}
+.br{background:var(--red-d);color:var(--red);border:1px solid #ff475733}
+.ba{background:var(--amber-d);color:var(--amber);border:1px solid #ffc10733}
+.bb{background:var(--blue-d);color:var(--blue);border:1px solid #4dabf733}
+.bm{background:var(--bg3);color:var(--muted2);border:1px solid var(--border2)}
+.prow{display:flex;align-items:center;padding:9px 16px;border-bottom:1px solid var(--border);gap:10px;cursor:pointer;transition:background .1s;font-size:12px}
+.prow:last-child{border-bottom:none}
+.prow:hover{background:var(--bg3)}
+.pdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.pname{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pprice{font-family:var(--mono);font-weight:700;font-size:12px;white-space:nowrap}
+.bar-chart{padding:14px 16px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{font-size:11px;color:var(--muted2);width:120px;flex-shrink:0;font-weight:500}
+.bar-wrap{flex:1;background:var(--bg3);border-radius:3px;height:5px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.bar-val{font-family:var(--mono);font-size:11px;min-width:40px;text-align:right;color:var(--muted2)}
+.range-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 16px}
+.range-cell{background:var(--bg3);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+.range-label{font-size:11px;font-weight:500;color:var(--muted2)}
+.range-count{font-family:var(--mono);font-size:14px;font-weight:700}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:8px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border)}
+.tbl td{padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg3)}
+.search-bar{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.search-input{flex:1;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:7px 12px;border-radius:var(--r);font-family:var(--sans);font-size:12px}
+.search-input:focus{outline:none;border-color:var(--green)}
+.search-input::placeholder{color:var(--muted)}
+.search-sel{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:var(--r);font-family:var(--sans);font-size:12px;cursor:pointer}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--green);color:var(--text);padding:10px 16px;border-radius:var(--r2);font-size:12px;font-weight:600;z-index:9999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.brand-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 16px}
+.brand-cell{background:var(--bg3);border-radius:var(--r);padding:12px;border:1px solid var(--border)}
+.brand-name{font-size:12px;font-weight:700;margin-bottom:3px}
+.brand-count{font-size:10px;color:var(--muted2);margin-bottom:5px}
+.brand-price{font-family:var(--mono);font-size:13px;font-weight:700}
+.brand-range{font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+.callout{background:linear-gradient(135deg,#ff475711,#3d0a0f22);border:1px solid #ff475733;border-radius:var(--r2);padding:14px 16px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px}
+.callout-icon{font-size:20px;flex-shrink:0}
+.callout-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.callout-body{font-size:12px;color:var(--muted2);line-height:1.6}
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;border-top:1px solid var(--border)}
+.page-btn{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--muted2);cursor:pointer}
+.page-btn:hover,.page-btn.on{background:var(--bg4);color:var(--text);border-color:var(--muted)}
+.page-info{font-family:var(--mono);font-size:10px;color:var(--muted);margin:0 8px}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="app">
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="logo-eyebrow">Musical Presentes</div>
+    <div class="logo-main">Price<em>Watch</em></div>
+    <div class="logo-sub">musicalpresentesonline.com.br</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="nav('dashboard',this)"><div class="nav-dot"></div>Dashboard</div>
+    <div class="nav-item" onclick="nav('catalog',this)"><div class="nav-dot"></div>Catálogo <span style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:4px">1.082</span></div>
+    <div class="nav-item" onclick="nav('categories',this)"><div class="nav-dot"></div>Categorias</div>
+    <div class="nav-item" onclick="nav('brands',this)"><div class="nav-dot"></div>Marcas</div>
+    <div class="nav-item" onclick="nav('competitors',this)"><div class="nav-dot"></div>Concorrentes <span class="nb">!</span></div>
+    <div class="nav-item" onclick="nav('whatsapp',this)"><div class="nav-dot"></div>WhatsApp</div>
+  </nav>
+  <div class="sb-footer">
+    <div><span class="pulse"></span>Ipatinga, MG</div>
+    <div style="margin-top:3px">1.070 produtos com preco</div>
+    <div style="margin-top:3px">API Loja Integrada: ativo</div>
+  </div>
+</aside>
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-r">
+      <button class="btn" onclick="window.open('https://www.musicalpresentesonline.com.br','_blank')">Ver Loja</button>
+      <button class="btn primary" onclick="showToast('Execute python backend/server.py para escanear em tempo real','var(--amber)')">Escanear Concorrentes</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="page active" id="page-dashboard">
+      <div class="metrics">
+        <div class="mc"><div class="mc-label">Total de produtos</div><div class="mc-val">1.082</div><div class="mc-sub">1.070 com preco cadastrado</div></div>
+        <div class="mc"><div class="mc-label">Categorias</div><div class="mc-val">15</div><div class="mc-sub">Instrumentos, audio, acessorios</div></div>
+        <div class="mc"><div class="mc-label">Marcas ativas</div><div class="mc-val">23</div><div class="mc-sub">Tagima, Seizi, Yamaha, Shure...</div></div>
+        <div class="mc"><div class="mc-label">Ticket medio</div><div class="mc-val" style="color:var(--green)">R$2.1k</div><div class="mc-sub">Faixa R$13 — R$59.900</div></div>
+      </div>
+      <div class="callout">
+        <div class="callout-icon">📍</div>
+        <div>
+          <div class="callout-title">Concorrente local — ShopMusic (Ipatinga, MG)</div>
+          <div class="callout-body">A ShopMusic opera lojas fisicas em Ipatinga, Teofilo Otoni e Gov. Valadares. Configure o backend para rastrear seus precos automaticamente e receber alertas via WhatsApp.</div>
+        </div>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <div class="card-h">Top 10 — Produtos mais caros <span class="badge bb">premium</span></div>
+          <div id="top10-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-h">Distribuicao por faixa de preco</div>
+          <div class="range-grid" id="ranges-grid"></div>
+          <div class="card-h" style="border-top:1px solid var(--border)">Volume por categoria</div>
+          <div class="bar-chart" id="cat-bars"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-catalog">
+      <div class="card">
+        <div class="card-h">Catalogo — Musical Presentes <span class="badge bm" id="cat-count">200 produtos</span></div>
+        <div class="search-bar">
+          <input class="search-input" id="search-input" placeholder="Buscar produto, marca, SKU..." oninput="filterCatalog()">
+          <select class="search-sel" id="cat-filter" onchange="filterCatalog()">
+            <option value="">Todas categorias</option>
+            <option>Violoes</option><option>Guitarras</option><option>Baixos</option>
+            <option>Teclados</option><option>Baterias</option><option>Microfones</option>
+            <option>Amplificadores</option><option>Fones</option><option>Pedaleiras</option>
+            <option>Audio Prof.</option><option>Sopros</option><option>Ukuleles</option>
+            <option>Cordas</option><option>Acessorios</option>
+          </select>
+          <select class="search-sel" id="sort-filter" onchange="filterCatalog()">
+            <option value="price_asc">Menor preco</option>
+            <option value="price_desc">Maior preco</option>
+            <option value="name">A-Z</option>
+          </select>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Produto</th><th>SKU</th><th>Preco</th><th>Link</th></tr></thead>
+          <tbody id="catalog-body"></tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-categories">
+      <div class="card">
+        <div class="card-h">Analise por Categoria — Clique para filtrar o catalogo</div>
+        <div class="bar-chart" id="cat-detail"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-brands">
+      <div class="card">
+        <div class="card-h">Marcas no catalogo</div>
+        <div class="brand-grid" id="brand-grid"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-competitors">
+      <div class="callout">
+        <div class="callout-icon">⚠️</div>
+        <div>
+          <div class="callout-title">Monitoramento em tempo real — configuracao necessaria</div>
+          <div class="callout-body">Execute <strong style="color:var(--text);font-family:var(--mono)">python backend/server.py</strong> na sua maquina. As duas chaves API ja estao configuradas no config.json e o sistema vai coletar precos dos 7 concorrentes automaticamente a cada 6 horas.</div>
+        </div>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <div class="card-h">Concorrentes configurados</div>
+          <div id="comp-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-h">Tipos de alerta</div>
+          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+            <div style="background:var(--red-d);border:1px solid #ff475733;border-radius:var(--r);padding:10px 12px;font-size:12px"><strong style="color:var(--red)">🔴 Caro:</strong> seu preco mais de 10% acima do menor concorrente</div>
+            <div style="background:var(--amber-d);border:1px solid #ffc10733;border-radius:var(--r);padding:10px 12px;font-size:12px"><strong style="color:var(--amber)">🟡 Atencao:</strong> 5-10% acima do menor concorrente</div>
+            <div style="background:var(--green-d);border:1px solid #1ed76033;border-radius:var(--r);padding:10px 12px;font-size:12px"><strong style="color:var(--green)">💚 Oportunidade:</strong> voce e o mais barato — pode subir a margem</div>
+            <div style="background:var(--blue-d);border:1px solid #4dabf733;border-radius:var(--r);padding:10px 12px;font-size:12px"><strong style="color:var(--blue)">📊 Relatorio:</strong> resumo diario as 9h via WhatsApp</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-whatsapp">
+      <div class="cols">
+        <div class="card">
+          <div class="card-h">Configuracao Z-API</div>
+          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px;font-size:12px">
+            <div><strong>1.</strong> Acesse <a href="https://z-api.io" target="_blank" style="color:var(--blue)">z-api.io</a>, crie uma conta e conecte seu WhatsApp via QR Code.</div>
+            <div><strong>2.</strong> Abra <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:var(--mono)">config/config.json</code> e preencha:
+              <pre style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:11px;color:var(--text);line-height:1.8;margin-top:8px;overflow-x:auto">"whatsapp": {
+  "enabled": true,
+  "provider": "zapi",
+  "instance_id": "SEU_INSTANCE_ID",
+  "token": "SEU_TOKEN",
+  "numbers": ["5533327129120"]
+}</pre>
+            </div>
+            <div><strong>3.</strong> Inicie o servidor:<br>
+              <code style="background:var(--bg3);padding:6px 10px;border-radius:4px;font-family:var(--mono);color:var(--green);display:block;margin-top:6px">python backend/server.py</code>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">Preview — Mensagem de alerta</div>
+          <div style="margin:14px 16px;background:#075e5422;border:1px solid #075e5466;border-radius:var(--r2);padding:14px;font-family:var(--mono);font-size:11px;line-height:1.9;white-space:pre-wrap;color:var(--text)">🔔 *PriceWatch — Musical Presentes*
+_29/05/2026 — 14:32_
+
+📦 *GUITARRA TAGIMA TG-510*
+━━━━━━━━━━━━━━━━━━━━
+Seu preco:  R$ 989,00
+ShopMusic:  R$ 899,00 📍 LOCAL
+Diferenca:  +10.0% ⚠️
+
+💡 Sugestao: R$ 889,00
+━━━━━━━━━━━━━━━━━━━━
+_musicalpresentesonline.com.br_</div>
+          <div class="card-h" style="border-top:1px solid var(--border)">Agendamento</div>
+          <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;font-size:12px">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span>Alertas imediatos (&gt;10%)</span><span class="badge bg">Ativo</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span>Relatorio diario 9h</span><span class="badge bg">Ativo</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0"><span>Varredura automatica</span><span class="badge bm">A cada 6h</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+</div>
+
+<script>
+const CATALOG_DATA = {"total": 1082, "com_preco": 1063, "cats": {"Violões": {"c": 107, "min": 145.0, "max": 11580.0, "avg": 2364.77}, "Guitarras": {"c": 91, "min": 175.0, "max": 6960.0, "avg": 2140.76}, "Baixos": {"c": 74, "min": 97.0, "max": 11070.0, "avg": 2924.83}, "Teclados": {"c": 47, "min": 100.0, "max": 16236.0, "avg": 3347.54}, "Baterias": {"c": 36, "min": 250.0, "max": 13835.0, "avg": 4483.63}, "Microfones": {"c": 70, "min": 30.0, "max": 13820.0, "avg": 2185.24}, "Amplificadores": {"c": 111, "min": 76.0, "max": 14460.0, "avg": 2665.64}, "Fones": {"c": 27, "min": 59.0, "max": 10990.0, "avg": 1874.55}, "Pedaleiras": {"c": 52, "min": 85.0, "max": 4650.0, "avg": 858.94}, "Áudio Prof.": {"c": 68, "min": 50.0, "max": 59900.0, "avg": 6883.38}, "Sopros": {"c": 9, "min": 55.0, "max": 4400.0, "avg": 1775.54}, "Ukuleles": {"c": 20, "min": 55.0, "max": 839.5, "avg": 400.26}, "Cordas": {"c": 77, "min": 20.0, "max": 8598.2, "avg": 1339.89}, "Acessórios": {"c": 87, "min": 12.9, "max": 4100.0, "avg": 885.59}, "Outros": {"c": 187, "min": 13.5, "max": 19038.0, "avg": 1268.86}}, "brands": {"SEIZI": {"c": 51, "avg": 2211.76, "min": 99.0, "max": 6500.0}, "BENSON": {"c": 13, "avg": 3871.98, "min": 920.0, "max": 9500.0}, "STRINBERG": {"c": 43, "avg": 1691.88, "min": 14.9, "max": 5550.0}, "MOOER": {"c": 10, "avg": 676.2, "min": 260.0, "max": 3630.0}, "WALDMAN": {"c": 16, "avg": 2670.5, "min": 199.0, "max": 13690.0}, "TAGIMA": {"c": 51, "avg": 2039.52, "min": 145.0, "max": 8390.0}, "IBANEZ": {"c": 11, "avg": 2727.73, "min": 270.0, "max": 4900.0}, "BOSS": {"c": 14, "avg": 1574.84, "min": 192.0, "max": 6820.0}, "YAMAHA": {"c": 36, "avg": 4869.6, "min": 55.0, "max": 16236.0}, "PEARL": {"c": 23, "avg": 4386.46, "min": 83.0, "max": 8380.0}, "ROLAND": {"c": 13, "avg": 3900.38, "min": 425.0, "max": 7690.0}, "TAMA": {"c": 3, "avg": 3093.33, "min": 1995.0, "max": 5290.0}, "DYLAN": {"c": 26, "avg": 971.15, "min": 80.0, "max": 3000.0}, "ZELLMER": {"c": 7, "avg": 1421.43, "min": 920.0, "max": 4100.0}, "GIANNINI": {"c": 41, "avg": 567.92, "min": 18.9, "max": 2600.0}, "SHURE": {"c": 26, "avg": 4130.45, "min": 199.0, "max": 13820.0}, "BEHRINGER": {"c": 25, "avg": 9503.71, "min": 175.0, "max": 59900.0}, "TAKAMINE": {"c": 10, "avg": 4931.0, "min": 3230.0, "max": 8360.0}, "ANTERA": {"c": 17, "avg": 3128.24, "min": 1400.0, "max": 5490.0}, "OVATION": {"c": 9, "avg": 7201.88, "min": 1995.5, "max": 11580.0}, "JBL": {"c": 32, "avg": 2144.59, "min": 59.0, "max": 8750.0}, "FOCUSRITE": {"c": 6, "avg": 1975.58, "min": 1469.9, "max": 2450.0}, "FENDER": {"c": 1, "avg": 895.0, "min": 895.0, "max": 895.0}}, "ranges": {"Até R$200": 180, "R$200-500": 132, "R$500-1k": 136, "R$1k-3k": 377, "R$3k-10k": 214, "Acima R$10k": 24}, "top10": [{"nome": "MESA DIGITAL BEHRINGER WING", "preco": 59900.0, "url": "https://www.musicalpresentesonline.com.br/mesa-digital-behringer-wing"}, {"nome": "MESA BEHRINGER WING COMPACT BLACK", "preco": 38800.0, "url": "https://www.musicalpresentesonline.com.br/mesa-behringer-wing-compact-black"}, {"nome": "MESA BEHRINGER X32 COMPACT DIGITAL", "preco": 27800.0, "url": "https://www.musicalpresentesonline.com.br/mesa-behringer-x32-compact-digital"}, {"nome": "MESA BEHRINGER DIGITAL X-32", "preco": 27760.0, "url": "https://www.musicalpresentesonline.com.br/mesa-behringer-digital-x-32-124294"}, {"nome": "MESA SOUNDCRAFT DIGITAL SI IMPACT", "preco": 26099.0, "url": "https://www.musicalpresentesonline.com.br/mesa-soundcraft-digital-si-impact"}, {"nome": "STAGE BOX MIDAS DL32", "preco": 23720.0, "url": "https://www.musicalpresentesonline.com.br/stage-box-midas-dl32"}, {"nome": "HOME HARMAN KARDON SURROUND BLK", "preco": 19038.0, "url": "https://www.musicalpresentesonline.com.br/home-harman-kardon-surround-blk"}, {"nome": "STAGE BOX BEHRINGER S32", "preco": 18950.0, "url": "https://www.musicalpresentesonline.com.br/stage-box-behringer-s32"}, {"nome": "KIT DE SOM AMBIENTE LOUD", "preco": 18040.0, "url": "https://www.musicalpresentesonline.com.br/kit-de-som-ambiente-loud"}, {"nome": "TECLADO YAMAHA PSR S970", "preco": 16236.0, "url": "https://www.musicalpresentesonline.com.br/teclado-yamaha-psr-s970"}], "cheap10": [{"nome": "ENCORD VIOLAO ACO NIG NPB-560 0.10 FOSFORO BRONZE", "preco": 52.0, "url": "https://www.musicalpresentesonline.com.br/encord-violao-aco-nig-npb-560-010-fosforo-bronze"}, {"nome": "ESTEIRA LIVERPOOL 14 36 FIOS", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/produto/esteira-liverpool-14-36-fios.html"}, {"nome": "ENCORD CONTRABAIXO STAGE EBB-440 4C - 147170", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/encord-contrabaixo-stage-ebb-440-4c-147170"}, {"nome": "PELE IZZO 22 LEITOSA GROSSA", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/pele-izzo-22-leitosa-p-bumbo-22-14861"}, {"nome": "CAPA SOLID SOUND UKULELE SOPRANO", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/capa-solid-sound-ukulele-soprano"}, {"nome": "BAQUETA LIVERPOOL GRIP 7A MADEIRA SG7AM", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/baqueta-liverpool-special-grip-7a-sg7am-ponta-madeira"}, {"nome": "GEL ABAFADOR LIVERPOOL", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/abafador-e-filtro-liverpool-ligel10"}, {"nome": "FLAUTA YAMAHA SOPRANO BARROCA YRS24B", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/flauta-doce-yamaha-soprano-barroca-yrs24b"}, {"nome": "FLAUTA DOCE YAMAHA GERMANICA YRS23G", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/flauta-doce-yamaha-germanica-yrs23"}, {"nome": "TERMOSTATO GELADEIRA ELECTROLUX C/ DEGELO E ABA (BULBO 0.93M) - T", "preco": 58.62, "url": "https://www.musicalpresentesonline.com.br/termostato-geladeira-electrolux-c-degelo-e-aba-bulbo-093m-tsv0011-09-tsv0008-09"}], "sample": [{"nome": "ENCORD CAVAQUINHO ACO MP", "preco": 12.9, "url": "https://www.musicalpresentesonline.com.br/encord-cavaquinho-aco-mp", "sku": "154413"}, {"nome": "MICRO AFINADOR WITTNER P/ VIOLA-123815", "preco": 20.0, "url": "https://www.musicalpresentesonline.com.br/produto/micro-afinador-wittner-p-viola-123815", "sku": "34883"}, {"nome": "PLUG SANTO ANGELO P2ST STEREO OURO CAPA PRETA", "preco": 25.0, "url": "https://www.musicalpresentesonline.com.br/produto/plug-santo-angelo-p2st-stereo.html", "sku": "114769"}, {"nome": "CABO STAGG MICROFONE XLR 3MTS  SMC3-139403", "preco": 30.0, "url": "https://www.musicalpresentesonline.com.br/cabo-stagg-microfone-xlr-3mts-smc3-139403", "sku": "166102"}, {"nome": "PANDEIRO INFANTIL 8\"DOLPHIN PELE ANIMAL", "preco": 38.9, "url": "https://www.musicalpresentesonline.com.br/pandeiro-infantil-8dolphin-pele-animal", "sku": "126946"}, {"nome": "ENCORDOAMENTO GIANNINI COBRA VIOLAO ACO 011 / 052 GEEFLK", "preco": 39.0, "url": "https://www.musicalpresentesonline.com.br/produto/encord-giannini-cobra-violao-011-geeflk-70980.html", "sku": "75374"}, {"nome": "TARRAXA CUSTOM S. CAVAQUINHO CMH 202", "preco": 43.0, "url": "https://www.musicalpresentesonline.com.br/tarraxa-custom-s-cavaquinho-cmh-202", "sku": "165105"}, {"nome": "COQUETEL DOMECQ 1L", "preco": 49.9, "url": "https://www.musicalpresentesonline.com.br/produto/coquetel-domecq-1l.html", "sku": "70"}, {"nome": "ENCORD CONTRABAIXO STAGE EBB-440 4C - 147170", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/encord-contrabaixo-stage-ebb-440-4c-147170", "sku": "145879"}, {"nome": "FLAUTA YAMAHA SOPRANO BARROCA YRS24B", "preco": 55.0, "url": "https://www.musicalpresentesonline.com.br/flauta-doce-yamaha-soprano-barroca-yrs24b", "sku": "142229"}, {"nome": "FONE JBL C-50HI BLK", "preco": 59.0, "url": "https://www.musicalpresentesonline.com.br/fone-in-ears-jbl-c50hi", "sku": "165558"}, {"nome": "ENCORDOAMENTO GIANNINI GUINGA VIOLAO NYLON SSCGG 3ª CORDA ENCAPADA", "preco": 65.0, "url": "https://www.musicalpresentesonline.com.br/encordoamento-giannini-guinga-violao-nylon-sscgg-3a-corda-encapada", "sku": "107327"}, {"nome": "floral de Saint German | Emergencial | Gotas| 10ml", "preco": 65.0, "url": "https://www.musicalpresentesonline.com.br/produto/floral-de-saint-german-emergencial-gotas-10ml.html", "sku": "9788557540952"}, {"nome": "XAROPE MONIN GRENADINE 700ML", "preco": 69.9, "url": "https://www.musicalpresentesonline.com.br/produto/xarope-monin-grenadine-700ml.html", "sku": "459"}, {"nome": "BAQUETA LIVERPOOL FELTRO SOFT LFS", "preco": 70.0, "url": "https://www.musicalpresentesonline.com.br/baqueta-liverpool-feltro-soft-lfs", "sku": "1660290"}, {"nome": "ENCORD SMART CONTRABAIXO 6C 032-141727", "preco": 75.0, "url": "https://www.musicalpresentesonline.com.br/encord-smart-contrabaixo-6c-032-141727", "sku": "166384"}, {"nome": "PANDEIRO IZZO 10\" ABS C/ PELE LEITOSA", "preco": 76.9, "url": "https://www.musicalpresentesonline.com.br/pandeiro-izzo-10-abs-c-pele-leitosa", "sku": "143899"}, {"nome": "ENCORD SOLEZ VIOLAO 011 SLAPB11 PHOSPHOR BRONZE", "preco": 80.0, "url": "https://www.musicalpresentesonline.com.br/produto/encord-violao-solez-011-slapb-11-phosphor-bronze-129312.html", "sku": "150385"}, {"nome": "ENCORD SOLEZ VIOLAO 010 SLAPB10 PHOSPHOR BRONZE", "preco": 80.0, "url": "https://www.musicalpresentesonline.com.br/encord-solez-violao-010-slapb-10-phosphor-bronze", "sku": "150378"}, {"nome": "PEDAL ONERR NO-1 OCTAVE NICKEL  96096", "preco": 85.0, "url": "https://www.musicalpresentesonline.com.br/pedal-onerr-no-1-octave-nickel-96096", "sku": "166185"}, {"nome": "MICROFONE DYLAN SMD100", "preco": 90.0, "url": "https://www.musicalpresentesonline.com.br/microfone-dylan-smd-100", "sku": "1661845"}, {"nome": "BAQUETA LIVERPOOL HICKORY 5A MADEIRA HY5AM", "preco": 90.0, "url": "https://www.musicalpresentesonline.com.br/baqueta-liverpool-hickory-5a-hy5am-146074", "sku": "135149"}, {"nome": "CORREIA SEIZI AIR STRAP LOCK LIGTH BLUE", "preco": 99.0, "url": "https://www.musicalpresentesonline.com.br/correia-seizi-air-strap-lock-ligth-blue", "sku": "1663371"}, {"nome": "GLOBO DYLAN P/ MICROFONE D9000", "preco": 100.0, "url": "https://www.musicalpresentesonline.com.br/globo-dylan-p-microfone-d9000", "sku": "1662778"}, {"nome": "PEDAL AUDIOBOX CH-X CRUNCH BOX OVERDRIVE  85656", "preco": 100.0, "url": "https://www.musicalpresentesonline.com.br/produto/pedal-audiobox-ch-x-crunch-box-overdrive-85656.html", "sku": "79471"}, {"nome": "Doce de Leite com Chocolate Balde 4,6 kg - Santa Maria", "preco": 105.98, "url": "https://www.musicalpresentesonline.com.br/doce-de-leite-com-chocolate-balde-46-kg-santa-maria", "sku": "000008"}, {"nome": "PELE SPANKING HIDRAULICA 20", "preco": 110.0, "url": "https://www.musicalpresentesonline.com.br/pele-spanking-hidraulica-20", "sku": "1660561"}, {"nome": "ENCORD CONTRABAIXO SG 0.40 5C", "preco": 115.5, "url": "https://www.musicalpresentesonline.com.br/encord-contrabaixo-sg-040-5c", "sku": "163194"}, {"nome": "ENCORD ERNIE BALL 012 P/DIGM VIOLAO", "preco": 126.9, "url": "https://www.musicalpresentesonline.com.br/encord-ernie-ball-012-pdigm-violao", "sku": "162777"}, {"nome": "ENCORD ERNIE BALL 012 VIOLAO ACO  PHOSPHOR BRONZE", "preco": 130.0, "url": "https://www.musicalpresentesonline.com.br/encord-violao-aco-ernie-ball-012-phosphor-bronze", "sku": "160100"}, {"nome": "ENCORDOAMENTO DADDARIO GUITARRA 011 XSE1149 REVESTIDA", "preco": 149.9, "url": "https://www.musicalpresentesonline.com.br/produto/encordoamento-daddario-guitarra-011-xse1149-revestida.html", "sku": "1661086"}, {"nome": "ENCORDOMENTO SG BAIXO 5 CORDAS 045", "preco": 150.0, "url": "https://www.musicalpresentesonline.com.br/produto/encord-sg-contrabaixo-5c-045-147491.html", "sku": "83881"}, {"nome": "PEDAL CHORUS COMPRESSOR CO-3", "preco": 160.0, "url": "https://www.musicalpresentesonline.com.br/pedal-chorus-compressor-co-3", "sku": "14236"}, {"nome": "ENCORDOAMENTO NIG BAIXO 5 CORDAS 045 N750", "preco": 180.0, "url": "https://www.musicalpresentesonline.com.br/encord-contrabaixo-nig-n-750-5-cordas", "sku": "142717"}, {"nome": "REPARO SELENIUM RPD-300TI 305TI", "preco": 199.0, "url": "https://www.musicalpresentesonline.com.br/produto/reparo-selenium-rpd-300ti-305ti.html", "sku": "70522"}, {"nome": "HEADPHONE AKG K-414 P - 116992", "preco": 199.0, "url": "https://www.musicalpresentesonline.com.br/fone-akg-k-414-p", "sku": "101899"}, {"nome": "PEDAL ONERR COPPER TREMOLO CT-1    50135", "preco": 210.0, "url": "https://www.musicalpresentesonline.com.br/pedal-onerr-copper-tremolo-ct-1-50135", "sku": "51729"}, {"nome": "ENCORDOAMENTO DADDARIO VIOLAO ACO 011 XSAPB1152 PHOSPHOR", "preco": 220.0, "url": "https://www.musicalpresentesonline.com.br/encord-daddario-violao-aco-011-xsapb1152-phosphor", "sku": "1660521"}, {"nome": "FONE DYLAN DL-640", "preco": 230.0, "url": "https://www.musicalpresentesonline.com.br/fone-dylan-dl-640", "sku": "1662062"}, {"nome": "MICROFONE KADOSH KL2 PARA SMARTPHONE", "preco": 239.0, "url": "https://www.musicalpresentesonline.com.br/microfone-kadosk-kl2-para-smartphone", "sku": "1660552"}, {"nome": "PEDAL CHORUS DELAY DL-A3", "preco": 247.5, "url": "https://www.musicalpresentesonline.com.br/produto/pedal-chorus-delay-dl-a3.html", "sku": "14243"}, {"nome": "PELE EVANS UNO BUMBO 18 RESPOSTA EQ4 UBD18RB", "preco": 250.0, "url": "https://www.musicalpresentesonline.com.br/pele-evans-uno-bumbo-18-resposta-eq4-ubd18rb", "sku": "1660328"}, {"nome": "MICROFONE KADOSH K-98", "preco": 260.0, "url": "https://www.musicalpresentesonline.com.br/microfone-kadosk-k98", "sku": "1660551"}, {"nome": "CAJON SPANKING VANGUARDA ACUSTICO-137690", "preco": 270.0, "url": "https://www.musicalpresentesonline.com.br/cajon-spanking-vanguarda-acustico-137690", "sku": "150095"}, {"nome": "ENCORDOAMENTO SG BAIXO 5C 040 SG+ REVESTIDA", "preco": 285.0, "url": "https://www.musicalpresentesonline.com.br/produto/encordoamento-sg-baixo-5c-040-sg-revestida.html", "sku": "1660950"}, {"nome": "ENCORDOAMENTO ELIXIR VIOLAO 011 PHOSPHOR BRONZE", "preco": 290.0, "url": "https://www.musicalpresentesonline.com.br/produto/encord-elixir-violao-011-phosphor-bronze-140331.html", "sku": "162753"}, {"nome": "MICROFONE DYLAN DLS-9", "preco": 320.0, "url": "https://www.musicalpresentesonline.com.br/microfone-dylan-dls-9", "sku": "1661847"}, {"nome": "PEDAL SHELTER SWP-1 WAH  133012", "preco": 329.0, "url": "https://www.musicalpresentesonline.com.br/pedal-shelter-swp-1-wah-133012", "sku": "166191"}, {"nome": "Cajon Microfonado Liverpool Master", "preco": 330.0, "url": "https://www.musicalpresentesonline.com.br/cajon-microfonado-liverpool-master", "sku": "1660272"}, {"nome": "UKULELE STRINBERG UK-06 SOPRANO-141840", "preco": 345.0, "url": "https://www.musicalpresentesonline.com.br/ukulele-strinberg-uk-06-soprano", "sku": "148290"}, {"nome": "PELE EVANS 14 CAIXA HD DRY POROSA B14HDD", "preco": 350.0, "url": "https://www.musicalpresentesonline.com.br/pele-evans-p-cxa-14-genera-hd-dry-b14hdd", "sku": "126533"}, {"nome": "FONE DYLAN IN EAR DE-635 3 DRIVES", "preco": 370.0, "url": "https://www.musicalpresentesonline.com.br/fone-dylan-in-ear-de-635-3-drives", "sku": "1661999"}, {"nome": "PEDAL MOOER FUNKY MONKEY 127356", "preco": 380.0, "url": "https://www.musicalpresentesonline.com.br/pedal-mooer-funky-monkey-127356", "sku": "166163"}, {"nome": "SUPORTE STAGG INSTRUMENTO COM BANCO  GIST-350", "preco": 399.0, "url": "https://www.musicalpresentesonline.com.br/produto/suporte-stagg-instrumento-com-banco-gist-350.html", "sku": "153416"}, {"nome": "VIOLAO GIANNINI NR INFANTIL 1/2 PRETO BK", "preco": 410.0, "url": "https://www.musicalpresentesonline.com.br/violao-giannini-nr-infantil-12-preto-bk", "sku": "1662644"}, {"nome": "SUPORTE ROLAND P/ BATERIA REVAS PB-350", "preco": 425.0, "url": "https://www.musicalpresentesonline.com.br/produto/suporte-roland-p-bateria-revas-pb-350.html", "sku": "1661092"}, {"nome": "PEDAL BOSS P/ GUITARRA DN-2 DYNA DRIVE  125246", "preco": 430.0, "url": "https://www.musicalpresentesonline.com.br/pedal-boss-p-guitarra-dn-2-dyna-drive", "sku": "108713"}, {"nome": "VIOLINO ALAN 1/8", "preco": 449.0, "url": "https://www.musicalpresentesonline.com.br/violino-alan-18", "sku": "1661945"}, {"nome": "UKULELE KALANI TENOR KAL220TS C/BAG", "preco": 455.9, "url": "https://www.musicalpresentesonline.com.br/ukulele-kalani-tenor-kall220-ts-cbag", "sku": "133364"}, {"nome": "VIOLAO WINNER INFANTIL 36", "preco": 470.0, "url": "https://www.musicalpresentesonline.com.br/violao-winner-infantil-36", "sku": "1660538"}, {"nome": "PEDAL CASIO sp-34 P/ PIANOS CDP-S150/S350 PX-S100/PX-S3000", "preco": 480.0, "url": "https://www.musicalpresentesonline.com.br/pedal-casio-p-painos-cdp-s150s350-px-s100px-s3000", "sku": "1660427"}, {"nome": "Kit Iniciante Violão", "preco": 490.0, "url": "https://www.musicalpresentesonline.com.br/kit-iniciante-violao", "sku": "KITINICIANTEVIOLAO"}, {"nome": "FONE SHURE SRH-240A", "preco": 499.0, "url": "https://www.musicalpresentesonline.com.br/fone-shure-srh-204", "sku": "1660410"}, {"nome": "ESTANTE D ONE P/ CAIXA DSS-1-145329", "preco": 520.0, "url": "https://www.musicalpresentesonline.com.br/produto/estante-d-one-p-caixa-dss-1-145329.html", "sku": "166434"}, {"nome": "PEDAL NIG LS-1 PATCH FINDER LINE SELECTOR 109383", "preco": 530.0, "url": "https://www.musicalpresentesonline.com.br/pedal-nig-ls-1-patch-finder-line-selector-109383", "sku": "166183"}, {"nome": "Fone JBL TUNE 120TWS", "preco": 549.0, "url": "https://www.musicalpresentesonline.com.br/fone-jbl-tune-120tws", "sku": "165559"}, {"nome": "MESA DMX PLS LITECRAFT", "preco": 575.0, "url": "https://www.musicalpresentesonline.com.br/mesa-dmx-pls-litecraft", "sku": "1660611"}, {"nome": "CANHÃO PLS MEGA PAR V2 54RGBW", "preco": 590.0, "url": "https://www.musicalpresentesonline.com.br/canhao-pls-mega-par-v2-54rgbw", "sku": "1660609"}, {"nome": "AMPLIFICADOR BORNE P/ GUITARRA F60 VINHO", "preco": 600.0, "url": "https://www.musicalpresentesonline.com.br/amplificador-borne-p-guitarra-f60-vinho", "sku": "1662760"}, {"nome": "MICROFONE DYLAN DW602 MAX DUPLO S/ FIO", "preco": 600.0, "url": "https://www.musicalpresentesonline.com.br/produto/microfone-dylan-dw-602-duplo-s-fio.html", "sku": "1660734"}, {"nome": "VIOLAO GIANNINI GNF1 EQ NYLON NATURAL FOSCO", "preco": 649.0, "url": "https://www.musicalpresentesonline.com.br/produto/violao-giannini-gnf1-135504.html", "sku": "145985"}, {"nome": "PRATO  STAGG SH-CH16R   139649", "preco": 655.0, "url": "https://www.musicalpresentesonline.com.br/prato-stagg-sh-ch16r-139649", "sku": "153201"}, {"nome": "MESA SOUNDVOICE MC6 BT INTERFACE", "preco": 680.0, "url": "https://www.musicalpresentesonline.com.br/produto/mesa-soundvoice-mc-6bt-interface.html", "sku": "1660621"}, {"nome": "VIOLINO DOMINANTE 4/4 COMPLETO C/ ESTOJO", "preco": 690.0, "url": "https://www.musicalpresentesonline.com.br/violino-dominante-44-com-estojo", "sku": "142632"}, {"nome": "CANHÃO PLS RGBW SUPER PROPAR LED 54    5W", "preco": 730.0, "url": "https://www.musicalpresentesonline.com.br/produto/canhao-pls-rgbw-super-propar-led-54-5w.html", "sku": "1661008"}, {"nome": "CAIXA JBL LINK 10 BLK", "preco": 740.0, "url": "https://www.musicalpresentesonline.com.br/caixa-jbl-link-10", "sku": "165575"}, {"nome": "UKULELE KALANI TENOR ACUSTICO MAORI SERIES KAL420T", "preco": 759.9, "url": "https://www.musicalpresentesonline.com.br/ukulele-kalani-tenor-acustico-kal-420t-maori-series", "sku": "163170"}, {"nome": "MICROFONE SHURE PGA-57   141178", "preco": 770.0, "url": "https://www.musicalpresentesonline.com.br/microfone-shure-pga-57-141178", "sku": "155526"}, {"nome": "CAJON ELÉTRICO 4HANDS ELEPHANT", "preco": 780.0, "url": "https://www.musicalpresentesonline.com.br/cajon-4-hands-elephant", "sku": "157865"}, {"nome": "MICROFONE SHURE PGA-58", "preco": 800.0, "url": "https://www.musicalpresentesonline.com.br/microfone-shure-pga-58", "sku": "156943"}, {"nome": "Ukulele Tenor Tagima 47K Elétrico", "preco": 839.5, "url": "https://www.musicalpresentesonline.com.br/ukulele-tenor-tagima-47k-eletrico", "sku": "158213"}, {"nome": "CANHÃO PLS SUPER PROPAR LED 54 RGBWA 5W", "preco": 860.0, "url": "https://www.musicalpresentesonline.com.br/produto/canhao-pls-super-propar-led-54-rgbwa-5w.html", "sku": "1661007"}, {"nome": "AMPLIFICADOR BORNE GO BASS P/ BAIXO GB-100", "preco": 880.0, "url": "https://www.musicalpresentesonline.com.br/amplificador-borne-go-bass-p-baixo-gb-100", "sku": "1660740"}, {"nome": "CAIXA JBL FLIP5 BLU", "preco": 899.0, "url": "https://www.musicalpresentesonline.com.br/produto/caixa-jbl-flip5-blu.html", "sku": "165566"}, {"nome": "VIOLAO ZELLMER HERITAGE FOLK CUTAWAY ACO GRAYBURST FOSCO", "preco": 920.0, "url": "https://www.musicalpresentesonline.com.br/violao-zellmer-heritage-folk-cutaway-aco-grayburst-fosco", "sku": "1662913"}, {"nome": "CAVACO GIANNINI CS-1  ACUSTICO", "preco": 925.0, "url": "https://www.musicalpresentesonline.com.br/cavaco-giannini-cs1-faia-acustico", "sku": "157537"}, {"nome": "VIOLAO ZELLMER HERITAGE FOLK CUTAWAY ACO ELETROACUSTICO BROWNBURST FOS", "preco": 940.0, "url": "https://www.musicalpresentesonline.com.br/violao-zellmer-heritage-folk-cutaway-aco-eletroacustico-brownburst-fosco-c-capa", "sku": "1662912"}, {"nome": "Caixa Amplificada Frahm MF600 APP", "preco": 955.9, "url": "https://www.musicalpresentesonline.com.br/caixa-amplificada-frahm-mf600-app", "sku": "84468"}, {"nome": "GUITARRA TAGIMA TG-510", "preco": 989.0, "url": "https://www.musicalpresentesonline.com.br/produto/guitarra-tagima-tg-510.html", "sku": "1660340"}, {"nome": "MÁQUINA DE FUMAÇA PLS F-1000", "preco": 999.0, "url": "https://www.musicalpresentesonline.com.br/maquina-de-fumaca-pls-f-1000", "sku": "118842"}, {"nome": "CAJON FSA CONFORT FCA4503", "preco": 1050.0, "url": "https://www.musicalpresentesonline.com.br/produto/cajon-fsa-confort-fca4503.html", "sku": "144360"}, {"nome": "CLARINETA HOYDEN BB HCL-25 FOSCO /BRILHANTE  118903", "preco": 1065.0, "url": "https://www.musicalpresentesonline.com.br/clarineta-hoyden-bb-hcl-25f", "sku": "158732"}, {"nome": "VIOLÃO GIANNINI GAD PLUS AUDITORIUM", "preco": 1080.0, "url": "https://www.musicalpresentesonline.com.br/violao-giannini-gad-plus-auditorium", "sku": "1661791"}, {"nome": "VIOLAO SEIZI FUN PANDA AÇO", "preco": 1100.0, "url": "https://www.musicalpresentesonline.com.br/violao-seizi-fun-panda-aco", "sku": "1662475"}, {"nome": "Caixa Amplificada Frahm MF Battery", "preco": 1105.9, "url": "https://www.musicalpresentesonline.com.br/caixa-amplificada-frahm-mf-battery", "sku": "155885"}, {"nome": "CAIXA NAGANO CLASSIC BEAT 14X6,5  141611", "preco": 1140.0, "url": "https://www.musicalpresentesonline.com.br/produto/caixa-nagano-classic-beat-14x65-141611.html", "sku": "156868"}, {"nome": "FONE AKG K371 BLUETOOTH HEADPHONE", "preco": 1150.0, "url": "https://www.musicalpresentesonline.com.br/fone-akg-k371-bluetooth-headphone", "sku": "1661789"}, {"nome": "PRATO KARPIUS LATAO CYMBAL GENESIS KIT 13 15 19", "preco": 1180.0, "url": "https://www.musicalpresentesonline.com.br/prato-karpius-latao-cymbal-genesis-kit-13-15-19", "sku": "169034"}, {"nome": "VIOLAO STRINBERG FOREST FS-2B BABY", "preco": 1190.0, "url": "https://www.musicalpresentesonline.com.br/violao-strinberg-forest-fs-2b-baby", "sku": "1660435"}, {"nome": "Caixa Selenium/JBL SCP 15X", "preco": 1214.0, "url": "https://www.musicalpresentesonline.com.br/caixa-seleniumjbl-scp-15x", "sku": "128667"}, {"nome": "VIOLAO STRINBERG FOREST FS-3C CLASSICO", "preco": 1240.0, "url": "https://www.musicalpresentesonline.com.br/violao-strinberg-forest-fs-3c-classico", "sku": "1660436"}, {"nome": "MICROFONE KARSECT S/FIO KRD-200DG GOOSENECK DUPLO", "preco": 1260.0, "url": "https://www.musicalpresentesonline.com.br/produto/microfone-karsect-sfio-krd-200dg-gooseneck-duplo", "sku": "1661593"}, {"nome": "FLAUTA TRANSVERSAL HOYDEN PRATEADA C HFL-25P-142816", "preco": 1296.0, "url": "https://www.musicalpresentesonline.com.br/flauta-transversal-hoyden-prateada-c-hfl-25p", "sku": "158749"}, {"nome": "VIOLAO TAGIMA FOLK OG33 BK NON CUTAWAY CACAU SANTOS", "preco": 1330.0, "url": "https://www.musicalpresentesonline.com.br/violao-tagima-folk-og33-bk-non-cutaway-cacau-santos", "sku": "1663380"}, {"nome": "VIOLAO TAGIMA BABY MAHOGANY", "preco": 1340.0, "url": "https://www.musicalpresentesonline.com.br/produto/violao-tagima-baby-mahogany.html", "sku": "153997"}, {"nome": "MICROFONE SHURE BETA 57A", "preco": 1350.0, "url": "https://www.musicalpresentesonline.com.br/microfone-shure-beta-57a", "sku": "1662026"}, {"nome": "GUITARRA STRINBERG SGS-180", "preco": 1360.0, "url": "https://www.musicalpresentesonline.com.br/produto/guitarra-strinberg-sgs-180.html", "sku": "1660431"}, {"nome": "CONTRABAIXO STRINBERG JBS40 LH CANHOTO", "preco": 1370.0, "url": "https://www.musicalpresentesonline.com.br/contrabaixo-strinberg-jbs40-lh-canhoto", "sku": "160964"}, {"nome": "VIOLINO EAGLE 4/4 VE-441", "preco": 1390.0, "url": "https://www.musicalpresentesonline.com.br/violino-eagle-44-ve441", "sku": "32063"}, {"nome": "GUITARRA SEIZI FUN KATANA MUSASHI STRATO HSS ROYAL DARK BLUE SPARKLE C", "preco": 1399.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-seizi-fun-katana-musashi-strato-hss-royal-dark-blue-sparkle-c-capa", "sku": "1663162"}, {"nome": "VIOLAO PHX WAVE FOLK TAMPO SOLIDO", "preco": 1399.0, "url": "https://www.musicalpresentesonline.com.br/violao-phx-wave-folk-tampo-solido", "sku": "1661861"}, {"nome": "CONTRABAIXO  STAGG 4 CORDAS  BC-300", "preco": 1436.9, "url": "https://www.musicalpresentesonline.com.br/contrabaixo-stagg-4-cordas-bc-300", "sku": "152952"}, {"nome": "MICROFONE SHURE SM57 LC", "preco": 1450.0, "url": "https://www.musicalpresentesonline.com.br/microfone-shure-voz-sm-57-lc-11891", "sku": "83249"}, {"nome": "Interface De Áudio Scarlett 2i2 Focusrite", "preco": 1469.9, "url": "https://www.musicalpresentesonline.com.br/interface-de-audio-scarlett-2i2-focusrite", "sku": "F2LJ654CD"}, {"nome": "GUITARRA SEIZI FUN KATANA MUSASHI STRATO HSS SPACE GREY SILVER C/ CAPA", "preco": 1485.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-seizi-fun-katana-musashi-strato-hss-space-grey-silver-c-capa", "sku": "1662770"}, {"nome": "VIOLAO EAGLE DH69T NT CLASSICO C/ CAPA NATURAL", "preco": 1499.0, "url": "https://www.musicalpresentesonline.com.br/violao-eagle-dh69t-nt-classico-c-capa-natural", "sku": "1662342"}, {"nome": "MICROFONE DYLAN D-9501 S/FIO DIGITAL RACK ANTENAS TRUE DIVERSITY", "preco": 1540.0, "url": "https://www.musicalpresentesonline.com.br/microfone-dylan-d-9501-sfio-digital-rack-antenas-true-diversity", "sku": "1661841"}, {"nome": "VIOLINO EAGLE VE-144   4/4", "preco": 1550.0, "url": "https://www.musicalpresentesonline.com.br/produto/violino-eagle-ve-144-44", "sku": "1661263"}, {"nome": "Viola Rozini Ponteio Presença Brasil RV315 ATN Elétrica", "preco": 1560.0, "url": "https://www.musicalpresentesonline.com.br/viola-rozini-ponteio-presenca-brasil-rv315-atn-eletrica", "sku": "159463"}, {"nome": "VIOLAO STRINBERG SD201HC MGS MAHOGANY FOLK C/ BAG", "preco": 1580.0, "url": "https://www.musicalpresentesonline.com.br/produto/violao-striberg-sd201hc-folk.html", "sku": "1660769"}, {"nome": "PEDALEIRA ZOOM G1X FOUR", "preco": 1599.0, "url": "https://www.musicalpresentesonline.com.br/pedaleira-zoom-g1x-four", "sku": "162654"}, {"nome": "CLARINETA EAGLE CL04", "preco": 1620.0, "url": "https://www.musicalpresentesonline.com.br/clarineta-eagle-cl04", "sku": "68826"}, {"nome": "VIOLINO EAGLE VE-145 4/4", "preco": 1650.0, "url": "https://www.musicalpresentesonline.com.br/produto/violino-eagle-ve-145-44", "sku": "1661264"}, {"nome": "TOM PEARL 8x7 EXPORT LACQUER EXL8P/C246  +ADAP20TH70S", "preco": 1662.5, "url": "https://www.musicalpresentesonline.com.br/tom-pearl-8x7-export-lacquer-exl8pc246-adap20th70s", "sku": "1660803"}, {"nome": "MICROFONE DYLAN D-9000S SEM FIO DUPLO DIGITAL C/ PILHAS DE LITHIUM", "preco": 1690.0, "url": "https://www.musicalpresentesonline.com.br/microfone-dylan-d-9000s-sem-fio-duplo-digital-c-pilhas-de-lithium", "sku": "1660833"}, {"nome": "GUITARRA WALDMAN ST441X AWS/B C/ CAPA ANTIQUE WHITE SATIN", "preco": 1710.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-waldman-st441x-awsb-c-capa-antique-white-satin", "sku": "1662710"}, {"nome": "BAIXO TAGIMA XB21 6 CORDAS VERMELHO", "preco": 1750.0, "url": "https://www.musicalpresentesonline.com.br/baixo-tagima-xb21-6-cordas-vermelho", "sku": "1663383"}, {"nome": "MICROFONE DYLAN QS-5 SEM FIO DUPLO", "preco": 1780.0, "url": "https://www.musicalpresentesonline.com.br/microfone-dylan-qs-5-sem-fio-duplo", "sku": "1662340"}, {"nome": "MESA SOUNDVOICE MS-602 EUX  135603", "preco": 1790.0, "url": "https://www.musicalpresentesonline.com.br/mesa-soundvoice-ms-602-eux-135603", "sku": "154208"}, {"nome": "VIOLAO J WHITE AHGC-100", "preco": 1860.0, "url": "https://www.musicalpresentesonline.com.br/violao-j-white-ahgc-100", "sku": "1660730"}, {"nome": "VIOLAO SEIZI HIRO C/ BAG", "preco": 1879.0, "url": "https://www.musicalpresentesonline.com.br/violao-seizi-hiro-c-bag", "sku": "1660575"}, {"nome": "VIOLAO TAGIMA SWELL", "preco": 1890.0, "url": "https://www.musicalpresentesonline.com.br/produto/violao-tagima-swell.html", "sku": "1660940"}, {"nome": "VIOLAO STRINBERG SJ-300WS", "preco": 1950.0, "url": "https://www.musicalpresentesonline.com.br/produto/violao-strinberg-sj-300ws.html", "sku": "1660843"}, {"nome": "BATERIA PREMIUM DX35J INFANTIL PRETA", "preco": 1990.0, "url": "https://www.musicalpresentesonline.com.br/produto/bateria-premium-dx-35-infantil-144407", "sku": "166061"}, {"nome": "VIOLA ROZINI RV155 CLASSICA IMBUIA FOSCO ELETRICA", "preco": 1999.0, "url": "https://www.musicalpresentesonline.com.br/viola-rozini-rv155-classica-imbuia-fosco-eletrica", "sku": "144674"}, {"nome": "BAIXO STRINBERG JBS55 5 CORDAS JAZZ BASS NATURAL", "preco": 2000.0, "url": "https://www.musicalpresentesonline.com.br/contrabaixo-strinberg-jbs-55-5c-147309", "sku": "166284"}, {"nome": "POWERPLAY BEHRINGER HA-8000", "preco": 2050.0, "url": "https://www.musicalpresentesonline.com.br/powerplay-behringer-ha-8000", "sku": "66754"}, {"nome": "GUITARRA TAGIMA T635 STRATO SURFGREEN  ESCALA ESCURA", "preco": 2090.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-tagima-t635-strato-surfgreen-escala-escura", "sku": "1662843"}, {"nome": "TECLADO ROLAND REVAS KB-330 + ESTANTE DUPLA + PEDAL + CAPA", "preco": 2139.0, "url": "https://www.musicalpresentesonline.com.br/teclado-roland-revas-kb-330-estante-dupla-pedal-capa", "sku": "LJ9PZ46EC"}, {"nome": "COLUNA LEACS L8 PASSIVA 350W CL-8PAS   146616", "preco": 2185.0, "url": "https://www.musicalpresentesonline.com.br/coluna-leacs-l8-passiva-350w-cl-8pas-146616", "sku": "164078"}, {"nome": "CAIXA JBL ACUSTICA  CV1270", "preco": 2221.5, "url": "https://www.musicalpresentesonline.com.br/caixa-acustica-jbl-cv1270", "sku": "154079"}, {"nome": "CAIXA MARSHALL P/ GUITARRA MG30 CFX", "preco": 2232.9, "url": "https://www.musicalpresentesonline.com.br/caixa-marshall-p-guitarra-mg30-cfx", "sku": "147606"}, {"nome": "CONTRABAIXO TAGIMA TJB-4", "preco": 2270.0, "url": "https://www.musicalpresentesonline.com.br/contrabaixo-tagima-tjb4", "sku": "141017"}, {"nome": "VIOLAO YAMAHA  FX-310 FOLK", "preco": 2310.0, "url": "https://www.musicalpresentesonline.com.br/violao-yamaha-fx-310-folk", "sku": "20114"}, {"nome": "Caixa Acústica Jbl Cv1270", "preco": 2351.4, "url": "https://www.musicalpresentesonline.com.br/caixa-acustica-jbl-cv1270-", "sku": "MLB1031753511"}, {"nome": "BAIXO WALDMAN GJJ500A FBKB 4 CORDAS ATIVO FLAMED BLACK BURST", "preco": 2380.0, "url": "https://www.musicalpresentesonline.com.br/baixo-waldman-gjj500a-fbkb-4-cordas-ativo-flamed-black-burst", "sku": "1662726"}, {"nome": "BAIXO SEIZI TITAN 4 CORDAS ATIVO BK PRETO", "preco": 2399.0, "url": "https://www.musicalpresentesonline.com.br/produto/contrabaixo-seizi-titan-4c", "sku": "1661645"}, {"nome": "Guitarra Tagima Stella Mahogany", "preco": 2434.0, "url": "https://www.musicalpresentesonline.com.br/produto/guitarra-tagima-stella-mahogany.html", "sku": "1660449"}, {"nome": "INTERFACE FOCUSRITE SCARLET SOLO 4ª GERACAO", "preco": 2450.0, "url": "https://www.musicalpresentesonline.com.br/interface-focusrite-scarlet-solo", "sku": "1660497"}, {"nome": "VIOLAO IBANEZ AEG-7MH", "preco": 2490.0, "url": "https://www.musicalpresentesonline.com.br/produto/violao-ibanez-aeg-7mh.html", "sku": "1660714"}, {"nome": "GUITARRA BENSON HARDY 902 M BK/BK MH GOLD", "preco": 2520.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-benson-hardy-902-m-bkbk-mh-gold", "sku": "1662860"}, {"nome": "TECLADO YAMAHA NP32B", "preco": 2571.8, "url": "https://www.musicalpresentesonline.com.br/teclado-yamaha-np32b", "sku": "150743"}, {"nome": "MESA DBR DM12 USB 12 CANAIS 4 AUXILIARES", "preco": 2590.0, "url": "https://www.musicalpresentesonline.com.br/produto/mesa-dbr-dm-12-usb.html", "sku": "163392"}, {"nome": "GUITARRA TAGIMA JA-3 JUNINHO AFRAM", "preco": 2650.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-tagima-ja-3-juninho-afram", "sku": "162470"}, {"nome": "AMPLIFICADOR BORNE VORAX 12100 STUDIO PALHA", "preco": 2700.0, "url": "https://www.musicalpresentesonline.com.br/amplificador-borne-vorax-12100-app", "sku": "1660330"}, {"nome": "AMPLIFICADOR BORNE GO BASS P/ BAIXO GB500", "preco": 2720.0, "url": "https://www.musicalpresentesonline.com.br/amplificador-borne-go-bass-p-baixo-gb500", "sku": "1661951"}, {"nome": "MESA SOUNDCRAFT SX1602FX USB", "preco": 2750.0, "url": "https://www.musicalpresentesonline.com.br/mesa-soundcraft-sx-1602fx-usb", "sku": "155175"}, {"nome": "GUITARRA CORT G250SE", "preco": 2790.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-cort-g250se", "sku": "1662417"}, {"nome": "HOME SOUNDBAR HKSB-20", "preco": 2800.0, "url": "https://www.musicalpresentesonline.com.br/caixa-bluetooth-300w-rms-soundbar-hksb20-kardon-harman-kardon", "sku": "165557"}, {"nome": "BAIXO WALDMAN JAZZ BASS GJJF455A SPSB 5 CORDAS ATIVO SUNBURST", "preco": 2840.0, "url": "https://www.musicalpresentesonline.com.br/baixo-waldman-gjjf455a-spsb-5-cordas-ativo-sunburst", "sku": "1662723"}, {"nome": "VIOLINO EAGLE VK-544  4/4", "preco": 2860.0, "url": "https://www.musicalpresentesonline.com.br/produto/violino-eagle-vk-544-44-162487", "sku": "162487"}, {"nome": "MICROFONE DYLAN QS-10 SEM FIO DIGITAL TRUE DIVERSITY", "preco": 2899.0, "url": "https://www.musicalpresentesonline.com.br/microfone-dylan-qs-10-sem-fio-digital-true-diversity", "sku": "1661842"}, {"nome": "BAIXO STRINBERG JBS 155AD 5 CORDAS ATIVO ORANGE", "preco": 2930.0, "url": "https://www.musicalpresentesonline.com.br/baixo-strinberg-jbs-155ad-5-cordas-ativo-orange", "sku": "1662872"}, {"nome": "SET PRATO SABIAN B8X PRO", "preco": 2956.0, "url": "https://www.musicalpresentesonline.com.br/set-prato-sabian-b8x-pro", "sku": "124072"}, {"nome": "CAIXA  ANTERA MX712 ATIVA", "preco": 2990.0, "url": "https://www.musicalpresentesonline.com.br/caixa-antera-mx712-ativa", "sku": "134224"}, {"nome": "GUITARRA SEIZI VINTAGE RONIN STRATO HUMBUCKER", "preco": 3050.0, "url": "https://www.musicalpresentesonline.com.br/produto/guitarra-seizi-vintage-ronin-strato-humbucker", "sku": "1661647"}, {"nome": "CAIXA ANTERA CP12 ATIVA", "preco": 3120.0, "url": "https://www.musicalpresentesonline.com.br/caixa-acustica-antera-cp12-ativa", "sku": "98151"}, {"nome": "GUITARRA BENSON HARDY S MD M PPB GOLD C/ CAPA", "preco": 3200.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-benson-hardy-s-md-m-ppb-gold-c-capa", "sku": "1662963"}, {"nome": "VIOLAO TAKAMINE GN-11", "preco": 3230.0, "url": "https://www.musicalpresentesonline.com.br/produto/violao-takamine-gn-11.html", "sku": "1660587"}, {"nome": "VIOLAO CRAFTER RG600 CE", "preco": 3252.9, "url": "https://www.musicalpresentesonline.com.br/violao-crafter-rg600-ce", "sku": "162883"}, {"nome": "GUITARRA SEIZI KATANA GHOST HSS PEARL WHITE C/ CAPA", "preco": 3299.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-seizi-katana-ghost-hss-pearl-white-c-capa", "sku": "1663374"}, {"nome": "VIOLAO TAKAMINE GY-11ME - 140874", "preco": 3370.0, "url": "https://www.musicalpresentesonline.com.br/violao-takamine-gy-11me-140874", "sku": "160537"}, {"nome": "CAIXA  ANTERA CP15 ATIVA", "preco": 3400.0, "url": "https://www.musicalpresentesonline.com.br/caixa-ativa-cp-15", "sku": "121866"}, {"nome": "Viola Rozini Dourada Cinturada RV217 ATV", "preco": 3490.0, "url": "https://www.musicalpresentesonline.com.br/viola-rozini-dourada-cinturada-rv217-atv", "sku": "151764"}, {"nome": "PIANO CASIO CDS-150 + PEDAL + BANQUETA + ESTANTE STAY", "preco": 3550.0, "url": "https://www.musicalpresentesonline.com.br/teclado-casio-cds-150-pedal-banqueta-estante-stay", "sku": "AZGJZAJ8A"}, {"nome": "BATERIA ACUSTICA ODERY IN ROCK IR-200", "preco": 3602.16, "url": "https://www.musicalpresentesonline.com.br/bateria-acustica-odery-in-rock-ir-200", "sku": "138222"}, {"nome": "PRATO DOMENE WORSHIP RIDE 24   24RWSP", "preco": 3655.0, "url": "https://www.musicalpresentesonline.com.br/produto/prato-domene-worship-ride-24-24rwsp", "sku": "1661637"}, {"nome": "GUITARRA BENSON BRAVE THREE TL HH SILVER C/ CAPA", "preco": 3700.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-benson-brave-three-tl-hh-silver-c-capa", "sku": "1663233"}, {"nome": "Viola Rozini Concertista Cinturada RV103 ATN", "preco": 3773.5, "url": "https://www.musicalpresentesonline.com.br/viola-rozini-concertista-cinturada-rv103-atn", "sku": "151771"}, {"nome": "CAIXA MARSHALL P/GUITARRA MG50 CFX", "preco": 3989.92, "url": "https://www.musicalpresentesonline.com.br/caixa-marshall-p-guitarra-mg50-cfx", "sku": "160216"}, {"nome": "SAX ALTO HOYDEN EB BK HAS-25B", "preco": 4030.0, "url": "https://www.musicalpresentesonline.com.br/saxofone-hoyden-eb-bk-has-25b", "sku": "158763"}, {"nome": "SAX ALTO ZELLMER ZAS600L LAQUEADO EM MI BEMOL", "preco": 4100.0, "url": "https://www.musicalpresentesonline.com.br/sax-alto-zellmer-zas600l-laqueado-em-mi-bemol", "sku": "1662888"}, {"nome": "VIOLAO STRINBERG DIAMOND DD5SC CB CHERRY SUNBURST FOLK C/ CASE", "preco": 4160.0, "url": "https://www.musicalpresentesonline.com.br/violao-strinberg-diamond-dd5sc-cb-cherry-sunburst-folk-c-case", "sku": "1662661"}, {"nome": "MESA SOUNDVOICE MP-24 24C   135856", "preco": 4379.0, "url": "https://www.musicalpresentesonline.com.br/produto/mesa-soundvoice-mp-24-24c-135856.html", "sku": "166040"}, {"nome": "CAIXA ANTERA HPC-405A", "preco": 4500.0, "url": "https://www.musicalpresentesonline.com.br/produto/caixa-antera-hpc-405a.html", "sku": "159227"}, {"nome": "PEDALEIRA ZOOM G6", "preco": 4650.0, "url": "https://www.musicalpresentesonline.com.br/produto/pedaleira-zoom-g6", "sku": "1661827"}, {"nome": "CAIXA LEACS LCR-815 ATIVA-146814 - 5922", "preco": 4730.0, "url": "https://www.musicalpresentesonline.com.br/caixa-leacs-lcr-815-ativa-146814", "sku": "163910"}, {"nome": "VIOLAO YAMAHA FG-TA", "preco": 4816.22, "url": "https://www.musicalpresentesonline.com.br/violao-yamaha-fg-ta", "sku": "157766"}, {"nome": "GUITARRA IBANEZ RGA-42FM-DEF", "preco": 4900.0, "url": "https://www.musicalpresentesonline.com.br/guitarra-ibanez-rga-42fm-def", "sku": "1661162"}, {"nome": "MESA DBR DM24 USB CANAIS 4 AUXILIARES", "preco": 4990.0, "url": "https://www.musicalpresentesonline.com.br/mesa-dbr-dm-24-usb", "sku": "1661858"}, {"nome": "BATERIA ACUSTICA ODERY JAM SESSION FL220", "preco": 5046.96, "url": "https://www.musicalpresentesonline.com.br/bateria-acustica-odery-jam-session-fl220", "sku": "144698"}, {"nome": "CAIXA DBR DXT 12 ATIVA 500WRMS", "preco": 5220.0, "url": "https://www.musicalpresentesonline.com.br/caixa-dbr-dxt-12-ativa-500wrms", "sku": "1661511"}, {"nome": "BATERIA PEARL ROADSHOW RS584/C33 PURE WHITE BUMBO 18 C/ FERRAGENS E BA", "preco": 5400.0, "url": "https://www.musicalpresentesonline.com.br/bateria-pearl-roadshow-rs584c33-pure-white-bumbo-18-c-ferragens-e-banco-18-10-14-13", "sku": "1662743"}, {"nome": "CAIXA ANTERA HPS-15A", "preco": 5490.0, "url": "https://www.musicalpresentesonline.com.br/caixa-antera-hps-15a", "sku": "160711"}, {"nome": "MICROFONE SHURE S/FIO BLX24BR/SM58-J10M15  SM-58", "preco": 5670.0, "url": "https://www.musicalpresentesonline.com.br/microfone-shure-sfio-blx24brsm58-j10-sm-58", "sku": "150019"}, {"nome": "MICROFONE SHURE SM7B", "preco": 5900.0, "url": "https://www.musicalpresentesonline.com.br/microfone-shure-sm7b", "sku": "1660603"}, {"nome": "BATERIA PEARL ROADSHOW RS525MS/C743 BUMBO 22 ROYAL BLUE METALIC", "preco": 6200.0, "url": "https://www.musicalpresentesonline.com.br/bateria-pearl-roadshow-rs525msc743-bumbo-22-royal-blue-metalic", "sku": "5BEZE2L6F"}, {"nome": "MESA SOUNDCRAFT UI24R DIGITAL 24 CANAIS", "preco": 6299.1, "url": "https://www.musicalpresentesonline.com.br/mesa-mixer-digital-soundcraft-ui-24r", "sku": "160612"}, {"nome": "TECLADO ROLAND BK-5", "preco": 6438.94, "url": "https://www.musicalpresentesonline.com.br/teclado-roland-bk-5", "sku": "130363"}, {"nome": "AMPLIFICADOR BOSS KATANA KTN 100-3", "preco": 6820.0, "url": "https://www.musicalpresentesonline.com.br/amplificador-boss-katana-ktn-100-3", "sku": "1661133"}]};
+const COMPETITORS = [
+  {name:"ShopMusic",url:"https://www.shopmusiconline.com.br",local:true,city:"Ipatinga, MG",products:3},
+  {name:"Super Sonora",url:"https://www.supersonora.com.br",local:false,city:"Nacional",products:3},
+  {name:"Loja Constelacao",url:"https://www.lojaconstelacao.com.br",local:false,city:"Nacional",products:2},
+  {name:"Guarani Musical",url:"https://www.guaranimusical.com.br",local:false,city:"Nacional",products:1},
+  {name:"American Musical",url:"https://www.americanmusical.com.br",local:false,city:"Nacional",products:1},
+  {name:"BH Guitar",url:"https://www.bhguitar.com.br",local:false,city:"BH, MG",products:1},
+  {name:"Mundomax",url:"https://www.mundomax.com.br",local:false,city:"Nacional",products:1},
+];
+const PAGE_TITLES={dashboard:"Dashboard",catalog:"Catalogo de Produtos",categories:"Analise por Categoria",brands:"Marcas",competitors:"Concorrentes",whatsapp:"WhatsApp & Alertas"};
+let currentPage=1,PER_PAGE=50,filteredProducts=[...CATALOG_DATA.sample];
+
+function nav(page,el){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  document.getElementById("page-"+page).classList.add("active");
+  el.classList.add("active");
+  document.getElementById("page-title").textContent=PAGE_TITLES[page]||page;
+  if(page==="catalog")renderCatalog();
+  if(page==="categories")renderCatDetail();
+  if(page==="brands")renderBrands();
+  if(page==="competitors")renderCompetitors();
+}
+
+function showToast(msg,color="var(--green)"){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.style.borderColor=color;
+  t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3500);
+}
+
+function fmt(n){return n!=null?"R$ "+Number(n).toLocaleString("pt-BR",{minimumFractionDigits:0,maximumFractionDigits:0}):"—";}
+
+function cat(nome){
+  const n=nome.toUpperCase();
+  if((n.includes("VIOLAO")||n.includes("VIOL\u00c3O"))&&!n.includes("ENCORD")&&!n.includes("CAPA")&&!n.includes("SUPORTE"))return"Violoes";
+  if(n.includes("GUITARRA")&&!n.includes("ENCORD")&&!n.includes("CABO")&&!n.includes("CAPA"))return"Guitarras";
+  if((n.includes("BAIXO")||n.includes("CONTRABAIXO"))&&!n.includes("ENCORD"))return"Baixos";
+  if(n.includes("TECLADO")||n.includes("PIANO"))return"Teclados";
+  if(n.includes("BATERIA"))return"Baterias";
+  if(n.includes("MICROFONE"))return"Microfones";
+  if(n.includes("AMPLIFICADOR")||n.includes("CUBO")||n.includes("CAIXA")||n.includes("COLUNA"))return"Amplificadores";
+  if(n.includes("FONE")||n.includes("HEADPHONE")||n.includes("IN EAR"))return"Fones";
+  if(n.includes("PEDALEIRA")||n.includes("PEDAL"))return"Pedaleiras";
+  if(n.includes("MESA")||n.includes("INTERFACE")||n.includes("STAGE BOX"))return"Audio Prof.";
+  if(n.includes("SAXOFONE")||n.includes("TROMPETE")||n.includes("TROMBONE")||n.includes("FLAUTA"))return"Sopros";
+  if(n.includes("UKULELE"))return"Ukuleles";
+  if(n.includes("VIOLINO")||n.includes("VIOLA ")||n.includes("ACORDEON"))return"Cordas";
+  if(n.includes("ENCORD")||n.includes("CABO ")||n.includes("CORREIA")||n.includes("PALHETA")||n.includes("CAPA ")||n.includes("SUPORTE"))return"Acessorios";
+  return"Outros";
+}
+
+function renderDashboard(){
+  // Top 10
+  let h="";
+  const colors=["var(--amber)","var(--muted2)","var(--muted)"];
+  CATALOG_DATA.top10.forEach((p,i)=>{
+    const c=i<3?colors[i]:"var(--muted)";
+    h+=`<div class="prow"><div class="pdot" style="background:${c}"></div><div class="pname" title="${p.nome}">${p.nome}</div><div class="pprice" style="color:${c}">${fmt(p.preco)}</div><a href="${p.url}" target="_blank" style="font-family:var(--mono);font-size:9px;color:var(--blue);text-decoration:none;margin-left:6px">↗</a></div>`;
+  });
+  document.getElementById("top10-list").innerHTML=h;
+
+  // Ranges
+  const ranges=CATALOG_DATA.ranges;
+  const rc=["var(--green)","var(--blue)","var(--amber)","var(--red)","var(--muted2)","var(--muted)"];
+  let rh="";
+  Object.entries(ranges).forEach(([k,v],i)=>{
+    rh+=`<div class="range-cell"><div><div class="range-label">${k}</div><div style="font-size:9px;color:var(--muted);margin-top:2px">${Math.round(v/1063*100)}%</div></div><div class="range-count" style="color:${rc[i]}">${v}</div></div>`;
+  });
+  document.getElementById("ranges-grid").innerHTML=rh;
+
+  // Cat bars
+  const cats=CATALOG_DATA.cats;
+  const maxC=Math.max(...Object.values(cats).map(c=>c.c));
+  let bh="";
+  Object.entries(cats).sort((a,b)=>b[1].c-a[1].c).slice(0,10).forEach(([k,v])=>{
+    const w=Math.round(v.c/maxC*100);
+    bh+=`<div class="bar-row"><div class="bar-label">${k}</div><div class="bar-wrap"><div class="bar-fill" style="width:${w}%;background:var(--green)"></div></div><div class="bar-val">${v.c}</div></div>`;
+  });
+  document.getElementById("cat-bars").innerHTML=bh;
+}
+
+function filterCatalog(){
+  const q=document.getElementById("search-input").value.toLowerCase();
+  const cf=document.getElementById("cat-filter").value;
+  const sf=document.getElementById("sort-filter").value;
+  filteredProducts=CATALOG_DATA.sample.filter(p=>{
+    const m=!q||p.nome.toLowerCase().includes(q)||(p.sku||"").toLowerCase().includes(q);
+    const c=!cf||cat(p.nome)===cf;
+    return m&&c;
+  });
+  if(sf==="price_desc")filteredProducts.sort((a,b)=>b.preco-a.preco);
+  else if(sf==="name")filteredProducts.sort((a,b)=>a.nome.localeCompare(b.nome));
+  else filteredProducts.sort((a,b)=>a.preco-b.preco);
+  currentPage=1;renderCatalog();
+}
+
+function renderCatalog(){
+  const start=(currentPage-1)*PER_PAGE;
+  const slice=filteredProducts.slice(start,start+PER_PAGE);
+  document.getElementById("cat-count").textContent=filteredProducts.length+" produtos";
+  let h="";
+  slice.forEach(p=>{
+    const c=cat(p.nome);
+    h+=`<tr><td style="max-width:320px"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.nome}</div><div style="font-size:10px;color:var(--muted);margin-top:1px">${c}</div></td><td><span style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${p.sku||"—"}</span></td><td><span style="font-family:var(--mono);font-weight:700">${fmt(p.preco)}</span></td><td><a href="${p.url}" target="_blank" style="color:var(--blue);text-decoration:none;font-family:var(--mono);font-size:10px">↗ ver</a></td></tr>`;
+  });
+  document.getElementById("catalog-body").innerHTML=h;
+  renderPagination();
+}
+
+function renderPagination(){
+  const total=Math.ceil(filteredProducts.length/PER_PAGE);
+  let h=`<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?"disabled":""}>← Ant</button>`;
+  const s=Math.max(1,currentPage-2),e=Math.min(total,s+4);
+  for(let i=s;i<=e;i++)h+=`<button class="page-btn ${i===currentPage?"on":""}" onclick="goPage(${i})">${i}</button>`;
+  h+=`<span class="page-info">${((currentPage-1)*PER_PAGE)+1}–${Math.min(currentPage*PER_PAGE,filteredProducts.length)} de ${filteredProducts.length}</span>`;
+  h+=`<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?"disabled":""}>Prox →</button>`;
+  document.getElementById("pagination").innerHTML=h;
+}
+
+function goPage(n){
+  const total=Math.ceil(filteredProducts.length/PER_PAGE);
+  if(n<1||n>total)return;
+  currentPage=n;renderCatalog();
+  document.getElementById("page-catalog").scrollIntoView({behavior:"smooth"});
+}
+
+function renderCatDetail(){
+  const cats=CATALOG_DATA.cats;
+  const maxA=Math.max(...Object.values(cats).map(c=>c.avg));
+  let h="";
+  Object.entries(cats).sort((a,b)=>b[1].c-a[1].c).forEach(([k,v])=>{
+    const w=Math.round(v.avg/maxA*100);
+    h+=`<div class="bar-row" style="margin-bottom:14px;cursor:pointer" onclick="filterByCat('${k}')">
+      <div class="bar-label" style="width:130px;font-weight:600;color:var(--text);font-size:12px">${k} <span style="font-weight:400;color:var(--muted);font-size:10px">(${v.c})</span></div>
+      <div class="bar-wrap" style="height:7px"><div class="bar-fill" style="width:${w}%;background:var(--green)"></div></div>
+      <div style="font-family:var(--mono);font-size:12px;font-weight:600;min-width:90px;text-align:right">${fmt(Math.round(v.avg))} <span style="color:var(--muted);font-weight:400;font-size:10px">media</span></div>
+    </div>`;
+  });
+  document.getElementById("cat-detail").innerHTML=h;
+}
+
+function filterByCat(c){
+  document.getElementById("cat-filter").value=c;
+  filteredProducts=CATALOG_DATA.sample.filter(p=>cat(p.nome)===c).sort((a,b)=>a.preco-b.preco);
+  currentPage=1;
+  nav("catalog",document.querySelectorAll(".nav-item")[1]);
+}
+
+function renderBrands(){
+  const brands=CATALOG_DATA.brands;
+  const cols=["var(--green)","var(--blue)","var(--amber)","var(--red)","var(--muted2)"];
+  let h="";
+  Object.entries(brands).sort((a,b)=>b[1].c-a[1].c).forEach(([k,v],i)=>{
+    const c=cols[i%cols.length];
+    h+=`<div class="brand-cell"><div class="brand-name" style="color:${c}">${k}</div><div class="brand-count">${v.c} produto${v.c>1?"s":""}</div><div class="brand-price" style="color:${c}">${fmt(Math.round(v.avg))}</div><div class="brand-range">R$${(v.min/1000).toFixed(1)}k – R$${(v.max/1000).toFixed(1)}k</div></div>`;
+  });
+  document.getElementById("brand-grid").innerHTML=h;
+}
+
+function renderCompetitors(){
+  let h="";
+  COMPETITORS.forEach(c=>{
+    h+=`<div class="prow"><div class="pdot" style="background:${c.local?"var(--red)":"var(--muted)"}"></div><div class="pname">${c.name}${c.local?" 📍":""}</div><div style="font-size:10px;color:var(--muted);margin-left:auto;margin-right:12px">${c.city}</div><a href="${c.url}" target="_blank" style="font-family:var(--mono);font-size:9px;color:var(--blue);text-decoration:none">↗</a></div>`;
+  });
+  document.getElementById("comp-list").innerHTML=h;
+}
+
+renderDashboard();
+</script>
+</body>
+</html>
