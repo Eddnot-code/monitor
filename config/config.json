@@ -7,7 +7,7 @@
   "telegram": {
     "enabled": true,
     "bot_token": "8394491554:AAE65U2uhjmssegA5DbbfvTcPAP8UdZYLkc",
-    "chat_ids": ["665712154"]
+    "chat_ids": ["665712154", "-5350359668"]
   },
 
   "alert_thresholds": {
