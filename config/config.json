@@ -38,7 +38,10 @@
         {"sku":"STRINBERG-STS100","name":"Guitarra Strinberg STS-100","url":"https://www.shopmusiconline.com.br/guitarra-strinberg-sts-100-stratocaster-preto"},
         {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.shopmusiconline.com.br/teclado-yamaha-psr-e373-arranjador-58-c-fonte-110220v-inclusa"},
         {"sku":"YAMAHA-PSR-F52","name":"Teclado Yamaha PSR F52","url":"https://www.shopmusiconline.com.br/teclado-yamaha-psr-f52-bra-58-c-fonte-bivolt"},
-        {"sku":"YAMAHA-PSR-EW410","name":"Teclado Yamaha PSR EW410","url":"https://www.shopmusiconline.com.br/teclado-yamaha-psr-ew410-com-fonte-inclusa"}
+        {"sku":"YAMAHA-PSR-EW410","name":"Teclado Yamaha PSR EW410","url":"https://www.shopmusiconline.com.br/teclado-yamaha-psr-ew410-com-fonte-inclusa"},
+        {"sku":"ROLAND-KB330","name":"Teclado Roland Revas KB-330","url":"https://www.shopmusiconline.com.br/buscar?q=roland+revas+kb330"},
+        {"sku":"KADOSH-K502M","name":"Microfone Kadosh K502M Duplo Sem Fio","url":"https://www.shopmusiconline.com.br/buscar?q=kadosh+k502m"},
+        {"sku":"PEARL-RS505-C31","name":"Bateria Pearl Roadshow RS505M C31 Jet Black","url":"https://www.shopmusiconline.com.br/buscar?q=pearl+roadshow+rs505"}
       ]
     },
     {
@@ -52,8 +55,9 @@
         {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.supersonora.com.br/guitarra-eletrica-stratocaster-tagima-tg-510-black"},
         {"sku":"TAGIMA-TG530","name":"Guitarra Tagima TG-530","url":"https://www.supersonora.com.br/guitarra-tagima-stratocaster-tg-530-woodstock-sunburst"},
         {"sku":"TAGIMA-T805","name":"Guitarra Tagima T-805","url":"https://www.supersonora.com.br/guitarra-tagima-t-805-brasil-stratocaster-preta"},
-        {"sku":"TAGIMA-SIXMART","name":"Guitarra Tagima Sixmart","url":"https://www.supersonora.com.br/guitarra-tagima-stratocaster-sixmart-preta-delay-reverb-chorus-distortion"},
-        {"sku":"VIOLAO-TAGIMA-ANDES","name":"Violao Tagima Andes Folk","url":"https://www.supersonora.com.br/violao-tagima-andes-aco-eletrico-agathis-latin-america-folk-natural-ntabs"}
+        {"sku":"ROLAND-KB330","name":"Teclado Roland Revas KB-330","url":"https://www.supersonora.com.br/teclado-roland-kb-330-revas-arranjador-61-teclas"},
+        {"sku":"KADOSH-K502M","name":"Microfone Kadosh K502M Duplo Sem Fio","url":"https://www.supersonora.com.br/buscar?q=kadosh+k502m"},
+        {"sku":"PEARL-RS505-C31","name":"Bateria Pearl Roadshow RS505","url":"https://www.supersonora.com.br/buscar?q=pearl+roadshow+rs505"}
       ]
     },
     {
@@ -65,7 +69,10 @@
         {"sku":"SEIZI-AKIRA","name":"Violao Seizi Akira","url":"https://www.lojaconstelacao.com.br/violao-eletroacustico-seizi-akira-kaizen-space-grey-marcelo-carvalho"},
         {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.lojaconstelacao.com.br/buscar?q=tagima+tg-510"},
         {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.lojaconstelacao.com.br/buscar?q=yamaha+psr+e373"},
-        {"sku":"YAMAHA-PSR-EW410","name":"Teclado Yamaha PSR EW410","url":"https://www.lojaconstelacao.com.br/buscar?q=yamaha+psr+ew410"}
+        {"sku":"YAMAHA-PSR-EW410","name":"Teclado Yamaha PSR EW410","url":"https://www.lojaconstelacao.com.br/buscar?q=yamaha+psr+ew410"},
+        {"sku":"ROLAND-KB330","name":"Teclado Roland Revas KB-330","url":"https://www.lojaconstelacao.com.br/buscar?q=roland+revas+kb330"},
+        {"sku":"KADOSH-K502M","name":"Microfone Kadosh K502M","url":"https://www.lojaconstelacao.com.br/buscar?q=kadosh+k502m"},
+        {"sku":"PEARL-RS505-C31","name":"Bateria Pearl Roadshow RS505","url":"https://www.lojaconstelacao.com.br/buscar?q=pearl+roadshow+rs505"}
       ]
     },
     {
@@ -75,7 +82,9 @@
       "products": [
         {"sku":"TAKAMINE-GD11","name":"Violao Takamine GD11","url":"https://www.guaranimusical.com.br/instrumentos-musicais/violao-folk-takamine-gd11mce-mahogany"},
         {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.guaranimusical.com.br/busca?q=tagima+tg510"},
-        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.guaranimusical.com.br/busca?q=yamaha+psr+e373"}
+        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.guaranimusical.com.br/busca?q=yamaha+psr+e373"},
+        {"sku":"ROLAND-KB330","name":"Teclado Roland Revas KB-330","url":"https://www.guaranimusical.com.br/busca?q=roland+revas+kb330"},
+        {"sku":"PEARL-RS505-C31","name":"Bateria Pearl Roadshow RS505","url":"https://www.guaranimusical.com.br/busca?q=pearl+roadshow+rs505"}
       ]
     },
     {
@@ -86,7 +95,9 @@
         {"sku":"GIANNINI-N14","name":"Violao Giannini N14","url":"https://www.americanmusical.com.br/violao-nylon-giannini-acustico-serie-start-estudante-n-14-n"},
         {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.americanmusical.com.br/guitarra-eletrica-tagima-tg-510-strato-hss"},
         {"sku":"TAGIMA-TG530","name":"Guitarra Tagima TG-530","url":"https://www.americanmusical.com.br/guitarra-tagima-tg530"},
-        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.americanmusical.com.br/teclado-arranjador-yamaha-psr-e373"}
+        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.americanmusical.com.br/teclado-arranjador-yamaha-psr-e373"},
+        {"sku":"ROLAND-KB330","name":"Teclado Roland Revas KB-330","url":"https://www.americanmusical.com.br/buscar?q=roland+revas+kb330"},
+        {"sku":"KADOSH-K502M","name":"Microfone Kadosh K502M","url":"https://www.americanmusical.com.br/buscar?q=kadosh+k502m"}
       ]
     },
     {
@@ -96,7 +107,9 @@
       "products": [
         {"sku":"SEIZI-AKIRA","name":"Violao Seizi Akira","url":"https://www.bhguitar.com.br/buscar?q=seizi+akira+kaizen"},
         {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.bhguitar.com.br/buscar?q=tagima+tg-510"},
-        {"sku":"TAGIMA-T635","name":"Guitarra Tagima T-635","url":"https://www.bhguitar.com.br/buscar?q=tagima+t-635"}
+        {"sku":"TAGIMA-T635","name":"Guitarra Tagima T-635","url":"https://www.bhguitar.com.br/buscar?q=tagima+t-635"},
+        {"sku":"KADOSH-K502M","name":"Microfone Kadosh K502M","url":"https://www.bhguitar.com.br/buscar?q=kadosh+k502m"},
+        {"sku":"PEARL-RS505-C31","name":"Bateria Pearl Roadshow RS505","url":"https://www.bhguitar.com.br/buscar?q=pearl+roadshow+rs505"}
       ]
     },
     {
@@ -106,7 +119,10 @@
       "products": [
         {"sku":"TAKAMINE-GD11","name":"Violao Takamine GD11","url":"https://www.mundomax.com.br/violao-gd11mce-mogno-takamine"},
         {"sku":"TAGIMA-TG510","name":"Guitarra Tagima TG-510","url":"https://www.mundomax.com.br/busca?q=tagima+tg510"},
-        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.mundomax.com.br/busca?q=yamaha+psr+e373"}
+        {"sku":"YAMAHA-PSR-E373","name":"Teclado Yamaha PSR E373","url":"https://www.mundomax.com.br/busca?q=yamaha+psr+e373"},
+        {"sku":"ROLAND-KB330","name":"Teclado Roland Revas KB-330","url":"https://www.mundomax.com.br/busca?q=roland+revas+kb330"},
+        {"sku":"KADOSH-K502M","name":"Microfone Kadosh K502M","url":"https://www.mundomax.com.br/busca?q=kadosh+k502m"},
+        {"sku":"PEARL-RS505-C31","name":"Bateria Pearl Roadshow RS505","url":"https://www.mundomax.com.br/busca?q=pearl+roadshow+rs505"}
       ]
     }
   ]
