@@ -23,6 +23,19 @@ SCRAPE_INTERVAL_HOURS = 6
 _scrape_lock = threading.Lock()
 _is_scraping = False
 
+# SIGE Cloud config
+SIGE_HEADERS = {
+    "Authorization-token": "a8f322ba60dcbc9124171063b6bd56a3dd355e146a50cb6863079d7d568d27d092d9d02ad70dd0ccb08bc268edcbd5ab2e22ce51672c95da7c63eaa34e8951fe26c8d74948478485a1438c04441810b9c7b5dfc5c0a4985b0051558dc6bdf20001beb52853b7cf3414768c80118826136838b785225e78d1d595d8f7f17ff524",
+    "User": "marketing@musicalpresentesonline.com.br",
+    "App": "API"
+}
+SIGE_TERMOS = [
+    "violao", "guitarra", "baixo", "teclado", "bateria",
+    "microfone", "amplificador", "caixa", "pedaleira", "fone",
+    "saxofone", "trompete", "cavaquinho", "ukulele", "violino",
+    "acordeon", "percussao", "pandeiro", "cajon", "interface"
+]
+
 def load_config():
     with open(CONFIG_PATH, encoding='utf-8') as f:
         return json.load(f)
@@ -39,6 +52,42 @@ def load_data(filename):
     with open(path, encoding='utf-8') as f:
         return json.load(f)
 
+def sync_sige():
+    """Busca todos os produtos do SIGE Cloud e salva em products.json"""
+    todos = {}
+    for termo in SIGE_TERMOS:
+        try:
+            r = requests.get(
+                "https://api.sigecloud.com.br/request/produtos/pesquisar",
+                params={"nome": termo},
+                headers=SIGE_HEADERS,
+                timeout=15
+            )
+            if r.status_code == 200:
+                for p in r.json():
+                    codigo = p.get("Codigo", "")
+                    if not codigo:
+                        continue
+                    preco = p.get("PrecoVenda") or (p.get("PrecosTabelas") or [{}])[0].get("PrecoVenda")
+                    if not preco or not (10 < preco < 50000):
+                        continue
+                    todos[codigo] = {
+                        "id":    codigo,
+                        "sku":   codigo,
+                        "nome":  p.get("Nome", ""),
+                        "preco": preco,
+                        "ativo": True,
+                        "url":   "https://www.musicalpresentesonline.com.br/buscar?q=" + p.get("Nome", "").replace(" ", "+"),
+                    }
+            time.sleep(0.3)
+        except Exception as e:
+            print(f"[sige] Erro {termo}: {e}")
+
+    produtos = list(todos.values())
+    save_data("products.json", produtos)
+    print(f"[sige] {len(produtos)} produtos sincronizados")
+    return produtos
+
 def run_scrape_and_alert():
     global _is_scraping
     try:
@@ -49,13 +98,8 @@ def run_scrape_and_alert():
 
         products = load_data('products.json')
         if not products:
-            print("[scheduler] Nenhum produto — carregando da API...")
-            api = LojaIntegradaAPI(
-                cfg['loja_integrada']['chave_api'],
-                cfg['loja_integrada']['chave_aplicacao']
-            )
-            products = api.get_products()
-            save_data('products.json', products)
+            print("[scheduler] Nenhum produto — sincronizando do SIGE Cloud...")
+            products = sync_sige()
 
         analyzer = PriceAnalyzer()
         alerts   = analyzer.generate_alerts(products, results, cfg['alert_thresholds'])
@@ -104,7 +148,11 @@ def maybe_run_scrape(force=False):
 
 @app.route('/')
 def home():
-    return jsonify({'app': 'PriceWatch — Musical Presentes', 'status': 'online', 'time': datetime.now().isoformat()})
+    return jsonify({
+        'app':    'PriceWatch — Musical Presentes',
+        'status': 'online',
+        'time':   datetime.now().isoformat()
+    })
 
 @app.route('/api/status')
 def status():
@@ -122,10 +170,35 @@ def status():
         'is_scraping':         _is_scraping,
     })
 
+@app.route('/api/products/sige', methods=['GET', 'POST'])
+def sync_sige_endpoint():
+    """Sincroniza produtos direto da API SIGE Cloud"""
+    def run():
+        sync_sige()
+    t = threading.Thread(target=run, daemon=True)
+    t.start()
+    return jsonify({
+        'status':    'iniciado',
+        'message':   'Sincronizando produtos do SIGE Cloud em background. Aguarde ~2 minutos.',
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/products/sige/sync', methods=['GET', 'POST'])
+def sync_sige_sync_endpoint():
+    """Sincroniza produtos do SIGE Cloud de forma sincrona"""
+    produtos = sync_sige()
+    return jsonify({
+        'synced':    len(produtos),
+        'timestamp': datetime.now().isoformat()
+    })
+
 @app.route('/api/products')
 def get_products():
     cfg = load_config()
-    api = LojaIntegradaAPI(cfg['loja_integrada']['chave_api'], cfg['loja_integrada']['chave_aplicacao'])
+    api = LojaIntegradaAPI(
+        cfg['loja_integrada']['chave_api'],
+        cfg['loja_integrada']['chave_aplicacao']
+    )
     products = api.get_products()
     save_data('products.json', products)
     return jsonify({'loaded': len(products)})
@@ -150,36 +223,52 @@ def get_alerts():
 @app.route('/api/scrape', methods=['POST'])
 def trigger_scrape():
     started = maybe_run_scrape(force=True)
-    return jsonify({'status': 'iniciado' if started else 'ja_em_andamento', 'timestamp': datetime.now().isoformat()})
+    return jsonify({
+        'status':    'iniciado' if started else 'ja_em_andamento',
+        'timestamp': datetime.now().isoformat()
+    })
 
 @app.route('/api/scrape/sync', methods=['POST'])
 def trigger_scrape_sync():
     global _is_scraping
     _is_scraping = False
-    n = run_scrape_and_alert()
+    n      = run_scrape_and_alert()
     alerts = load_data('alerts.json') or []
     return jsonify({'scraped': 7, 'alerts': n, 'timestamp': datetime.now().isoformat()})
 
 @app.route('/api/cron', methods=['GET', 'POST', 'HEAD'])
 def cron_endpoint():
-    """Endpoint para UptimeRobot — aceita GET, dispara scraping a cada 6h automaticamente"""
+    """Endpoint para UptimeRobot — aceita GET, dispara scraping a cada 6h"""
     started  = maybe_run_scrape(force=False)
     last_run = load_data('last_run.json') or {}
-    return jsonify({'status': 'ok', 'scrape_started': started, 'last_run': last_run, 'timestamp': datetime.now().isoformat()})
+    return jsonify({
+        'status':         'ok',
+        'scrape_started': started,
+        'last_run':       last_run,
+        'timestamp':      datetime.now().isoformat()
+    })
 
 @app.route('/api/telegram/test', methods=['POST', 'GET'])
 def test_telegram():
     cfg = load_config()
     tg  = TelegramAlerter(cfg['telegram'])
     tg.enabled = True
-    ok = tg.broadcast("✅ PriceWatch online na nuvem!\nMusical Presentes · Ipatinga, MG\n\nSistema rodando 24h no Railway.\nAlertas automaticos a cada 6 horas.")
+    ok = tg.broadcast(
+        "✅ PriceWatch online na nuvem!\n"
+        "Musical Presentes · Ipatinga, MG\n\n"
+        "Sistema rodando 24h no Railway.\n"
+        "Alertas automaticos a cada 6 horas."
+    )
     return jsonify({'sent': ok > 0})
 
 @app.route('/api/update-price', methods=['POST'])
 def update_price():
     body = request.json
     cfg  = load_config()
-    api  = LojaIntegradaAPI(cfg['loja_integrada']['chave_api'], cfg['loja_integrada']['chave_aplicacao'])
+    api  = LojaIntegradaAPI(
+        cfg['loja_integrada']['chave_api'],
+        cfg['loja_integrada']['chave_aplicacao']
+    )
     return jsonify(api.update_price(body['product_id'], body['new_price']))
 
 if __name__ == '__main__':
