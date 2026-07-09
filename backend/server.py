@@ -1,4 +1,5 @@
 """
+# PriceWatch v2.0 — SIGE Cloud integration — 2026-07-09
 PriceWatch - Backend API Server
 Musical Presentes - musicalpresentesonline.com.br
 """
