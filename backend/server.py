@@ -1,3 +1,4 @@
+# PriceWatch v3.0 — Loja Integrada + SIGE Cloud — 2026-07-09
 """
 PriceWatch - Backend API Server
 Musical Presentes - musicalpresentesonline.com.br
@@ -5,7 +6,7 @@ Musical Presentes - musicalpresentesonline.com.br
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import json, os, threading, time
+import json, os, threading, time, requests
 from datetime import datetime, timedelta
 from scraper import CompetitorScraper
 from loja_integrada import LojaIntegradaAPI
@@ -23,12 +24,12 @@ SCRAPE_INTERVAL_HOURS = 6
 _scrape_lock = threading.Lock()
 _is_scraping = False
 
-# SIGE Cloud config
 SIGE_HEADERS = {
     "Authorization-token": "a8f322ba60dcbc9124171063b6bd56a3dd355e146a50cb6863079d7d568d27d092d9d02ad70dd0ccb08bc268edcbd5ab2e22ce51672c95da7c63eaa34e8951fe26c8d74948478485a1438c04441810b9c7b5dfc5c0a4985b0051558dc6bdf20001beb52853b7cf3414768c80118826136838b785225e78d1d595d8f7f17ff524",
     "User": "marketing@musicalpresentesonline.com.br",
     "App": "API"
 }
+
 SIGE_TERMOS = [
     "violao", "guitarra", "baixo", "teclado", "bateria",
     "microfone", "amplificador", "caixa", "pedaleira", "fone",
@@ -52,10 +53,8 @@ def load_data(filename):
     with open(path, encoding='utf-8') as f:
         return json.load(f)
 
-def sync_sige():
-    import requests
-    """Busca todos os produtos do SIGE Cloud e salva em products.json"""
-    todos = {}
+def get_sige_prices():
+    precos = {}
     for termo in SIGE_TERMOS:
         try:
             r = requests.get(
@@ -70,24 +69,48 @@ def sync_sige():
                     if not codigo:
                         continue
                     preco = p.get("PrecoVenda") or (p.get("PrecosTabelas") or [{}])[0].get("PrecoVenda")
-                    if not preco or not (10 < preco < 50000):
-                        continue
-                    todos[codigo] = {
-                        "id":    codigo,
-                        "sku":   codigo,
-                        "nome":  p.get("Nome", ""),
-                        "preco": preco,
-                        "ativo": True,
-                        "url":   "https://www.musicalpresentesonline.com.br/buscar?q=" + p.get("Nome", "").replace(" ", "+"),
-                    }
+                    if preco and 10 < preco < 50000:
+                        precos[codigo] = preco
             time.sleep(0.3)
         except Exception as e:
             print(f"[sige] Erro {termo}: {e}")
+    print(f"[sige] {len(precos)} precos carregados")
+    return precos
 
-    produtos = list(todos.values())
-    save_data("products.json", produtos)
-    print(f"[sige] {len(produtos)} produtos sincronizados")
-    return produtos
+def sync_products():
+    cfg = load_config()
+    print("[sync] Buscando produtos da Loja Integrada...")
+    api = LojaIntegradaAPI(
+        cfg['loja_integrada']['chave_api'],
+        cfg['loja_integrada']['chave_aplicacao']
+    )
+    li_products = api.get_products()
+    print(f"[sync] {len(li_products)} produtos da LI")
+
+    print("[sync] Buscando precos do SIGE Cloud...")
+    sige_precos = get_sige_prices()
+
+    produtos_finais = []
+    matched = 0
+    for p in li_products:
+        sku   = str(p.get('sku', ''))
+        preco = sige_precos.get(sku)
+        if preco:
+            matched += 1
+        if p.get('nome'):
+            produtos_finais.append({
+                "id":    p.get('id'),
+                "sku":   sku,
+                "nome":  p.get('nome', ''),
+                "preco": preco,
+                "ativo": p.get('ativo', True),
+                "url":   p.get('url', ''),
+            })
+
+    produtos_validos = [p for p in produtos_finais if p.get('preco') and p.get('nome')]
+    save_data('products.json', produtos_validos)
+    print(f"[sync] {len(produtos_validos)} produtos com preco ({matched} cruzados LI+SIGE)")
+    return produtos_validos
 
 def run_scrape_and_alert():
     global _is_scraping
@@ -98,9 +121,9 @@ def run_scrape_and_alert():
         save_data('competitors.json', results)
 
         products = load_data('products.json')
-        if not products:
-            print("[scheduler] Nenhum produto — sincronizando do SIGE Cloud...")
-            products = sync_sige()
+        if not products or not any(p.get('preco') for p in (products if isinstance(products, list) else [])):
+            print("[scheduler] Sem produtos com preco — sincronizando LI+SIGE...")
+            products = sync_products()
 
         analyzer = PriceAnalyzer()
         alerts   = analyzer.generate_alerts(products, results, cfg['alert_thresholds'])
@@ -110,7 +133,7 @@ def run_scrape_and_alert():
         if alerts and cfg['telegram']['enabled']:
             tg   = TelegramAlerter(cfg['telegram'])
             sent = tg.send_alerts(alerts)
-            print(f"[{datetime.now()}] {len(alerts)} alertas, {sent} enviados no Telegram")
+            print(f"[{datetime.now()}] {len(alerts)} alertas, {sent} enviados")
             if datetime.now().hour == 9:
                 comparison = analyzer.compare(products, results)
                 tg.send_daily_report(comparison)
@@ -127,8 +150,8 @@ def run_scrape_and_alert():
 
 def maybe_run_scrape(force=False):
     global _is_scraping
-    last_run = load_data('last_run.json') or {}
-    last_ts  = last_run.get('timestamp')
+    last_run   = load_data('last_run.json') or {}
+    last_ts    = last_run.get('timestamp')
     should_run = force
     if not should_run:
         if not last_ts:
@@ -149,57 +172,59 @@ def maybe_run_scrape(force=False):
 
 @app.route('/')
 def home():
-    return jsonify({
-        'app':    'PriceWatch — Musical Presentes',
-        'status': 'online',
-        'time':   datetime.now().isoformat()
-    })
+    return jsonify({'app': 'PriceWatch — Musical Presentes', 'status': 'online', 'time': datetime.now().isoformat()})
 
 @app.route('/api/status')
 def status():
-    products    = load_data('products.json')
-    competitors = load_data('competitors.json')
-    alerts      = load_data('alerts.json') or []
-    last_run    = load_data('last_run.json') or {}
+    products  = load_data('products.json')
+    comp      = load_data('competitors.json')
+    alerts    = load_data('alerts.json') or []
+    last_run  = load_data('last_run.json') or {}
+    com_preco = len([p for p in products if p.get('preco')]) if isinstance(products, list) else 0
     return jsonify({
         'status':              'ok',
         'timestamp':           datetime.now().isoformat(),
         'products_loaded':     len(products) if isinstance(products, list) else 0,
-        'competitors_scraped': len(competitors),
+        'products_com_preco':  com_preco,
+        'competitors_scraped': len(comp),
         'alerts':              len(alerts),
         'last_run':            last_run,
         'is_scraping':         _is_scraping,
     })
 
-@app.route('/api/products/sige', methods=['GET', 'POST'])
-def sync_sige_endpoint():
-    """Sincroniza produtos direto da API SIGE Cloud"""
-    def run():
-        sync_sige()
-    t = threading.Thread(target=run, daemon=True)
-    t.start()
-    return jsonify({
-        'status':    'iniciado',
-        'message':   'Sincronizando produtos do SIGE Cloud em background. Aguarde ~2 minutos.',
-        'timestamp': datetime.now().isoformat()
-    })
+@app.route('/api/products/sync/now', methods=['GET', 'POST'])
+def sync_now():
+    produtos  = sync_products()
+    com_preco = len([p for p in produtos if p.get('preco')])
+    return jsonify({'total': len(produtos), 'com_preco': com_preco, 'timestamp': datetime.now().isoformat()})
 
 @app.route('/api/products/sige/sync', methods=['GET', 'POST'])
-def sync_sige_sync_endpoint():
-    """Sincroniza produtos do SIGE Cloud de forma sincrona"""
-    produtos = sync_sige()
-    return jsonify({
-        'synced':    len(produtos),
-        'timestamp': datetime.now().isoformat()
-    })
+def sync_sige_sync():
+    todos = {}
+    for termo in SIGE_TERMOS:
+        try:
+            r = requests.get(
+                "https://api.sigecloud.com.br/request/produtos/pesquisar",
+                params={"nome": termo}, headers=SIGE_HEADERS, timeout=15
+            )
+            if r.status_code == 200:
+                for p in r.json():
+                    codigo = p.get("Codigo", "")
+                    if not codigo: continue
+                    preco = p.get("PrecoVenda") or (p.get("PrecosTabelas") or [{}])[0].get("PrecoVenda")
+                    if preco and 10 < preco < 50000:
+                        todos[codigo] = {"id": codigo, "sku": codigo, "nome": p.get("Nome",""), "preco": preco, "ativo": True, "url": "https://www.musicalpresentesonline.com.br/buscar?q="+p.get("Nome","").replace(" ","+")}
+            time.sleep(0.3)
+        except Exception as e:
+            print(f"[sige] Erro {termo}: {e}")
+    produtos = list(todos.values())
+    save_data('products.json', produtos)
+    return jsonify({'synced': len(produtos), 'timestamp': datetime.now().isoformat()})
 
 @app.route('/api/products')
 def get_products():
     cfg = load_config()
-    api = LojaIntegradaAPI(
-        cfg['loja_integrada']['chave_api'],
-        cfg['loja_integrada']['chave_aplicacao']
-    )
+    api = LojaIntegradaAPI(cfg['loja_integrada']['chave_api'], cfg['loja_integrada']['chave_aplicacao'])
     products = api.get_products()
     save_data('products.json', products)
     return jsonify({'loaded': len(products)})
@@ -212,10 +237,8 @@ def get_competitors():
 def get_comparison():
     products    = load_data('products.json')
     competitors = load_data('competitors.json')
-    if not products or not competitors:
-        return jsonify([])
-    analyzer = PriceAnalyzer()
-    return jsonify(analyzer.compare(products, competitors))
+    if not products or not competitors: return jsonify([])
+    return jsonify(PriceAnalyzer().compare(products, competitors))
 
 @app.route('/api/alerts')
 def get_alerts():
@@ -224,52 +247,34 @@ def get_alerts():
 @app.route('/api/scrape', methods=['POST'])
 def trigger_scrape():
     started = maybe_run_scrape(force=True)
-    return jsonify({
-        'status':    'iniciado' if started else 'ja_em_andamento',
-        'timestamp': datetime.now().isoformat()
-    })
+    return jsonify({'status': 'iniciado' if started else 'ja_em_andamento', 'timestamp': datetime.now().isoformat()})
 
 @app.route('/api/scrape/sync', methods=['POST'])
 def trigger_scrape_sync():
     global _is_scraping
     _is_scraping = False
-    n      = run_scrape_and_alert()
-    alerts = load_data('alerts.json') or []
+    n = run_scrape_and_alert()
     return jsonify({'scraped': 7, 'alerts': n, 'timestamp': datetime.now().isoformat()})
 
 @app.route('/api/cron', methods=['GET', 'POST', 'HEAD'])
 def cron_endpoint():
-    """Endpoint para UptimeRobot — aceita GET, dispara scraping a cada 6h"""
     started  = maybe_run_scrape(force=False)
     last_run = load_data('last_run.json') or {}
-    return jsonify({
-        'status':         'ok',
-        'scrape_started': started,
-        'last_run':       last_run,
-        'timestamp':      datetime.now().isoformat()
-    })
+    return jsonify({'status': 'ok', 'scrape_started': started, 'last_run': last_run, 'timestamp': datetime.now().isoformat()})
 
 @app.route('/api/telegram/test', methods=['POST', 'GET'])
 def test_telegram():
     cfg = load_config()
     tg  = TelegramAlerter(cfg['telegram'])
     tg.enabled = True
-    ok = tg.broadcast(
-        "✅ PriceWatch online na nuvem!\n"
-        "Musical Presentes · Ipatinga, MG\n\n"
-        "Sistema rodando 24h no Railway.\n"
-        "Alertas automaticos a cada 6 horas."
-    )
+    ok = tg.broadcast("✅ PriceWatch online na nuvem!\nMusical Presentes · Ipatinga, MG\n\nSistema rodando 24h no Railway.\nAlertas automaticos a cada 6 horas.")
     return jsonify({'sent': ok > 0})
 
 @app.route('/api/update-price', methods=['POST'])
 def update_price():
     body = request.json
     cfg  = load_config()
-    api  = LojaIntegradaAPI(
-        cfg['loja_integrada']['chave_api'],
-        cfg['loja_integrada']['chave_aplicacao']
-    )
+    api  = LojaIntegradaAPI(cfg['loja_integrada']['chave_api'], cfg['loja_integrada']['chave_aplicacao'])
     return jsonify(api.update_price(body['product_id'], body['new_price']))
 
 if __name__ == '__main__':
