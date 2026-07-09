@@ -1,5 +1,4 @@
 """
-# PriceWatch v2.0 — SIGE Cloud integration — 2026-07-09
 PriceWatch - Backend API Server
 Musical Presentes - musicalpresentesonline.com.br
 """
@@ -54,6 +53,7 @@ def load_data(filename):
         return json.load(f)
 
 def sync_sige():
+    import requests
     """Busca todos os produtos do SIGE Cloud e salva em products.json"""
     todos = {}
     for termo in SIGE_TERMOS:
@@ -274,6 +274,5 @@ def update_price():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-
     print(f"PriceWatch iniciado — porta {port}")
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
